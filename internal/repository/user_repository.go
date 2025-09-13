@@ -16,9 +16,11 @@ func (r *userRepository) Create(ctx context.Context,user *domain.User) error{
 	return r.db.WithContext(ctx).Create(user).Error
 }
 func (r *userRepository)	Update(ctx context.Context, user *domain.User) error{
-		
+		return r.db.WithContext(ctx).Save(user).Error
 }
 func (r *userRepository) Delete(ctx context.Context, id uint) error{
+
+	return  r.db.WithContext(ctx).Delete(&domain.User{},id).Error
 
 }
 func (r *userRepository) GetById(ctx context.Context,id uint)(*domain.User, error){
