@@ -17,7 +17,10 @@ type Database struct {
     Name     string `mapstructure:"name"`
     PoolSize string `mapstructure:"pool_size"`
 }
-
+type JWT struct{
+    AccessSecret string `mapstructure:"access_secret"`
+    RefreshSecret string `mapstructure:"refresh_secret"`
+}
 type Server struct {
     Host string `mapstructure:"host"`
     Port string `mapstructure:"port"`
@@ -26,6 +29,8 @@ type Server struct {
 type Config struct {
     Database Database `mapstructure:"database"`
     Server   Server   `mapstructure:"server"`
+    JWT   JWT   `mapstructure:"jwt"`
+
 }
 
 func (c Config) DBConnectionString() string {
@@ -55,6 +60,9 @@ func LoadConfig() (Config, error) {
     viper.BindEnv("database.user", "DB_USER")
     viper.BindEnv("database.password", "DB_PASSWORD")
     viper.BindEnv("database.name", "DB_NAME")
+    viper.BindEnv("jwt.access_secter","ACCESS_SECRET")
+
+    viper.BindEnv("jwt.refresh_secter","REFRESH_SECRET")
 
     if err := viper.Unmarshal(&cfg); err != nil {
         return cfg, fmt.Errorf("failed to unmarshal config: %w", err)
