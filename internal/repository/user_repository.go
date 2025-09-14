@@ -12,11 +12,17 @@ type userRepository struct{
 func NewUserRepository(db *gorm.DB) UserRepository{
 	return &userRepository{db:db}
 }
-func (r *userRepository) Create(ctx context.Context,user *domain.User) error{
-	return r.db.WithContext(ctx).Create(user).Error
+func (r *userRepository) Create(ctx context.Context, user *domain.User) (*domain.User, error) {
+    if err := r.db.WithContext(ctx).Create(user).Error; err != nil {
+        return nil, err
+    }
+    return user, nil
 }
-func (r *userRepository)	Update(ctx context.Context, user *domain.User) error{
-		return r.db.WithContext(ctx).Save(user).Error
+func (r *userRepository)	Update(ctx context.Context,id uint, user *domain.User) error{
+		return r.db.WithContext(ctx).
+        Model(&domain.User{}).
+        Where("id = ?", id).
+        Updates(user).Error
 }
 func (r *userRepository) Delete(ctx context.Context, id uint) error{
 

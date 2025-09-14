@@ -13,8 +13,33 @@ func NewUserService(repo repository.UserRepository) UserService{
 	return &userService{repo:repo}
 }
 func (s *userService) CreateUser(ctx context.Context, input CreateUserInput) (*domain.User, error) {
+	user,err := s.repo.Create(ctx,&domain.User{
+		Username:input.Username,
+		Email:input.Email,
+		PasswordHash:input.Password,
+	})
+	if err!=nil{
+		return nil,err
+	}
 	
+	return user,nil
 }
 
-func (s *userService)	GetUserById(ctx context.Context,id uint)(*domain.User, error)
-func (s *userService)	UpdateUser(ctx context.Context,id uint,input CreateUserInput)(*domain.User, error)
+func (s *userService)	GetUserById(ctx context.Context,id uint)(*domain.User, error){
+	user,err:=  s.repo.GetById(ctx,id)
+ if err!=nil{
+		return nil,err
+	}
+ return user,nil
+}
+func (s *userService)	UpdateUser(ctx context.Context,id uint,input CreateUserInput) error{
+	err:= s.repo.Update(ctx,id,&domain.User{
+		Username:input.Username,
+		Email:input.Email,
+		PasswordHash:input.Password,
+	})
+	if err!=nil{
+		return err
+	}
+	return  nil
+}

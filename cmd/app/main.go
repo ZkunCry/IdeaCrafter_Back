@@ -21,7 +21,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("error loading config: %v", err) 
 	}
-	log.("Loaded config: %v",cfg)
+	log.Printf("Loaded config: %v",cfg)
 	
 	db, err := gorm.Open(postgres.Open(cfg.DBConnectionString()),&gorm.Config{})
 	if err !=nil{
@@ -46,7 +46,7 @@ func main() {
 	app:= fiber.New(fiber.Config{
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
 			code := fiber.StatusInternalServerError
-			if e, ok := err.(*fiber.Error): ok {
+			if e, ok := err.(*fiber.Error); ok {
 				code = e.Code
 			}
 			return c.Status(code).JSON(fiber.Map{"error":err.Error()})

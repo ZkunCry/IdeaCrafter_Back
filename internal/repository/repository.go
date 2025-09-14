@@ -8,10 +8,10 @@ import (
 )
 
 type UserRepository interface {
-	Create(ctx context.Context, user *domain.User) error
-	Update(ctx context.Context, user *domain.User) error
+	Create(ctx context.Context, user *domain.User) (*domain.User, error)
+	Update(ctx context.Context,id uint, user *domain.User) error
 	Delete(ctx context.Context, id uint) error
-
+	GetById(ctx context.Context,id uint)(*domain.User, error)
 }
 
 type StartupRepository interface {

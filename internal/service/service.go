@@ -8,9 +8,12 @@ import (
 type UserService interface{
 	CreateUser(ctx context.Context,input CreateUserInput)(*domain.User, error)
 	GetUserById(ctx context.Context,id uint)(*domain.User, error)
-	UpdateUser(ctx context.Context,id uint,input CreateUserInput)(*domain.User, error)
+	UpdateUser(ctx context.Context,id uint,input CreateUserInput)error
 }
-
+type PasswordService interface{
+	HashPassword(password string) (string, error)
+  ComparePassword(hashedPassword, password string) error
+}
 type CreateUserInput struct {
     Username string `json:"username" validate:"required,min=3"`
     Email    string `json:"email" validate:"required,email"`
@@ -24,10 +27,12 @@ type UpdateUserInput struct {
 
 type Services struct {
     User   UserService
+		Password PasswordService
 }
 
 func NewServices(repos *repository.Repositories) *Services{
 	return &Services{
 		User: NewUserService(repos.User),
+		Password: NewPasswordService(),
 	}
 }

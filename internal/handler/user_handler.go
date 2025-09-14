@@ -8,7 +8,11 @@ import (
 type UserHandler struct{
 	service service.UserService
 }
-
+type UserResponse struct {
+	ID       uint   `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+}
 func NewUserHandler(service service.UserService) * UserHandler{
 	return &UserHandler{service:service}
 }
@@ -21,6 +25,10 @@ func (h *UserHandler) Register(c *fiber.Ctx) error {
   if err != nil {
       return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
   }
-
-  return c.Status(fiber.StatusCreated).JSON(user)
+  response:= UserResponse{
+    ID:user.ID,
+    Username:user.Username,
+    Email: user.Email ,
+  }
+  return c.Status(fiber.StatusCreated).JSON(response)
 }
