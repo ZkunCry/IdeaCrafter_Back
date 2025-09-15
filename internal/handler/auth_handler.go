@@ -5,9 +5,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 )
-type UserHandler struct{
-	service service.UserService
-  authService service.AuthService
+type AuthHandler struct{
+	service *service.Services
 }
 type UserResponse struct {
 	ID       uint   `json:"id"`
@@ -15,16 +14,17 @@ type UserResponse struct {
 	Email    string `json:"email"`
   AccessToken string `json:"access_token"`
 }
-func NewUserHandler(service service.UserService) * UserHandler{
-	return &UserHandler{service:service}
+func NewAuthHandler(service *service.Services) * AuthHandler{
+	return &AuthHandler{service: service}
 }
-func (h *UserHandler) Register(c *fiber.Ctx) error {
-
+func (h *AuthHandler) Register(c *fiber.Ctx) error {
+ 
   var input service.CreateUserInput
   if err := c.BodyParser(&input); err != nil {
       return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid input"})
    }
-   resultUser,err:=  h.authService.SignUpUser(c.Context(), input)
+  
+   resultUser,err:=   h.service.Auth.SignUpUser(c.Context(), input)
    if err != nil {
        return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
    }

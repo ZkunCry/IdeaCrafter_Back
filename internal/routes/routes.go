@@ -19,6 +19,6 @@ func SetupRoutes ( app *fiber.App ,handlers *handler.Handlers){
 	
 	api := app.Group("/api")
 	auth:=api.Group("/auth")
-	auth.Post("/register",handlers.User.Register)
+	auth.Post("/register",handlers.Auth.Register)
 
 }

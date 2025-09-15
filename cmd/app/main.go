@@ -41,6 +41,7 @@ func main() {
 	}
 	repos:= repository.NewRespositories(db)
 	services:= service.NewServices(repos,&cfg)
+	fmt.Printf("Services %v\n",services)
 	handlers:=handler.NewHandlers(services)
 
 	app:= fiber.New(fiber.Config{

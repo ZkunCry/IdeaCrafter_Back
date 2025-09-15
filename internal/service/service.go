@@ -46,6 +46,7 @@ type Services struct {
     User   UserService
 		Password PasswordService
 		Token TokenService
+		Auth AuthService
 }
 
 func NewServices(repos *repository.Repositories,cfg *config.Config) *Services{
@@ -54,5 +55,6 @@ func NewServices(repos *repository.Repositories,cfg *config.Config) *Services{
 		User: NewUserService(repos.User),
 		Password: NewPasswordService(),
 		Token: NewTokenService(cfg.JWT.AccessSecret,cfg.JWT.RefreshSecret),
+		Auth: NewAuthService(NewUserService(repos.User),NewPasswordService(),NewTokenService(cfg.JWT.AccessSecret,cfg.JWT.RefreshSecret)),
 	}
 }
