@@ -12,6 +12,8 @@ type UserRepository interface {
 	Update(ctx context.Context,id uint, user *domain.User) error
 	Delete(ctx context.Context, id uint) error
 	GetById(ctx context.Context,id uint)(*domain.User, error)
+	GetByEmail(ctx context.Context, email string)(*domain.User, error)
+
 }
 
 type StartupRepository interface {

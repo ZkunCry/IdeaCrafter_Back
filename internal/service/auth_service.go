@@ -3,43 +3,71 @@ package service
 import (
 	"context"
 	"errors"
-	"startup_back/internal/config"
+	"startup_back/internal/domain"
 )
 type authService struct {
 	UserService     UserService
 	PasswordService PasswordService
-	AccessSecret    []byte
-	RefreshSecret   []byte
+	TokenService    TokenService
 }
 
-func NewAuthService(cfg config.Config, userSvc UserService, passSvc PasswordService) AuthService {
+func NewAuthService(userSvc UserService, passSvc PasswordService,tokenSvc TokenService) AuthService {
 	return &authService{
 		UserService:     userSvc,
 		PasswordService: passSvc,
-		AccessSecret:    []byte(cfg.JWT.AccessSecret),
-		RefreshSecret:   []byte(cfg.JWT.RefreshSecret),
+		TokenService:  tokenSvc,
 	}
 }
 
-func (s *authService) SignUpUser(ctx context.Context, input CreateUserInput) (string, error) {
-	user, err := s.UserService.CreateUser(ctx, input)
-	if err != nil {
-		return "", err
+func (s *authService) SignUpUser(ctx context.Context, input CreateUserInput) (response AuthResponse, err error) {
+	user,err:= s.UserService.GetUserByEmail(ctx, input.Email)
+	if err == nil {
+		return AuthResponse{}, errors.New("User already exists")
 	}
-	//TODO: добавить генерацию аксес токена
+	hashPassword, err := s.PasswordService.HashPassword(input.Password)
+	if err != nil {
+		return AuthResponse{}, err
+	}
+	newUser:= &domain.User{
+		Username: input.Username,
+		Email: input.Email,
+		PasswordHash: hashPassword,
+	}
+	createUser, err := s.UserService.CreateUser(ctx, CreateUserInput{
+		Username: newUser.Username,
+		Email: newUser.Email,
+		Password: hashPassword,
+	})
+	if err != nil {
+		return AuthResponse{}, err
+	}
+
+	accessToken,err := s.TokenService.GenerateAccessToken(user.ID)
+	if err != nil {
+		return AuthResponse{}, err
+	}
+	refreshToken,err := s.TokenService.GenerateRefreshToken(user.ID)
+	if err != nil {
+		return AuthResponse{}, err
+	}
+	return AuthResponse{
+		User: createUser,
+		AccessToken: accessToken,
+		RefreshToken: refreshToken,
+	},nil
 	
 }
 
-func (s *authService) SignInUser(ctx context.Context, email, password string) (string, error) {
-		//TODO: добавить получение юзера по емайл
+func (s *authService) SignInUser(ctx context.Context, email, password string) (response AuthResponse, err error) {
+
 
 	if err != nil {
-		return "", errors.New("user not found")
+		return AuthResponse{}, errors.New("user not found")
 	}
 
-	if err := s.PasswordService.ComparePassword(user.PasswordHash, password); err != nil {
-		return "", errors.New("invalid credentials")
+	if err := s.PasswordService.ComparePassword("fsdfds", password); err != nil {
+		return  AuthResponse{}, errors.New("invalid credentials")
 	}
-	//TODO: добавить генерацию аксес токена
+	return AuthResponse{}, nil
 
 }

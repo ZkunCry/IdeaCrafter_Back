@@ -40,10 +40,10 @@ func (c Config) DBConnectionString() string {
 
 func LoadConfig() (Config, error) {
     var cfg Config
-		if err:= godotenv.Load(); err != nil {
-		log.Println("no .env file found")
-		}
-    // читаем config.yaml
+	if err:= godotenv.Load(); err != nil {
+        log.Println("no .env file found")
+	}
+
     viper.SetConfigName("config")
     viper.SetConfigType("yaml")
     viper.AddConfigPath("internal/config/")
@@ -51,19 +51,14 @@ func LoadConfig() (Config, error) {
     if err := viper.ReadInConfig(); err != nil {
         return cfg, fmt.Errorf("failed to read config.yaml: %w", err)
     }
-
-    // связываем ENV
     viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
     viper.AutomaticEnv()
-
-    // биндим конкретные env
     viper.BindEnv("database.user", "DB_USER")
     viper.BindEnv("database.password", "DB_PASSWORD")
     viper.BindEnv("database.name", "DB_NAME")
-    viper.BindEnv("jwt.access_secter","ACCESS_SECRET")
-
-    viper.BindEnv("jwt.refresh_secter","REFRESH_SECRET")
-
+    viper.BindEnv("jwt.access_secret", "ACCESS_SECRET")
+    viper.BindEnv("jwt.refresh_secret", "REFRESH_SECRET")
+    
     if err := viper.Unmarshal(&cfg); err != nil {
         return cfg, fmt.Errorf("failed to unmarshal config: %w", err)
     }

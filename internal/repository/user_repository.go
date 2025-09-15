@@ -41,3 +41,12 @@ func (r *userRepository) GetById(ctx context.Context,id uint)(*domain.User, erro
 	}
 	return &user,err
 }
+
+func (r * userRepository) GetByEmail(ctx context.Context, email string)(*domain.User, error){
+	var user domain.User
+	err:= r.db.WithContext(ctx).First(&user,"email = ?",email).Error
+	if err != nil{
+		return nil,err
+	}
+	return &user,err
+}

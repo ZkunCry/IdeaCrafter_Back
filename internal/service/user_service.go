@@ -43,3 +43,11 @@ func (s *userService)	UpdateUser(ctx context.Context,id uint,input CreateUserInp
 	}
 	return  nil
 }
+
+func (s * userService	)	GetUserByEmail(ctx context.Context,email string)(*domain.User, error){
+	user,err:=  s.repo.GetByEmail(ctx,email)
+ if err!=nil{
+		return nil,err
+	}
+ return user,nil
+}
