@@ -10,6 +10,8 @@ type Startup struct {
     Creator     User         `gorm:"foreignKey:CreatorID" json:"creator"`
     Categories  []Category   `gorm:"many2many:startup_categories" json:"categories"` 
     Files       []StartupFile `gorm:"foreignKey:StartupID" json:"files"`
+
+    Vacancies []Vacancy `gorm:"foreignKey:StartupID" json:"vacancies"`
 }
 
 type CreateStartupInput struct {

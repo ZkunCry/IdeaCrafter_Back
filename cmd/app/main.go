@@ -35,6 +35,9 @@ func main() {
 		&domain.Membership{},
 		&domain.Favorite{},
 		&domain.StartupFile{},
+		&domain.Role{},
+		&domain.Vacancy{},
+		&domain.Application{},
 	)
 	if err != nil{
 		logrus.Fatalf("Failed to migrate database: %v", err)
