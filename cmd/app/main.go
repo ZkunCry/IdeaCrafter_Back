@@ -60,7 +60,7 @@ func main() {
 			return c.Status(code).JSON(fiber.Map{"error":err.Error()})
 		},
 	})
-	routes.SetupRoutes(app,handlers)
+	routes.SetupRoutes(app,handlers,services)
 	address := fmt.Sprintf("%s:%s", cfg.Server.Host,cfg.Server.Port)
 	logrus.Infof("Starting server on %s", address)
 	if err:= app.Listen(address); err!=nil{

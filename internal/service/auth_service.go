@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"startup_back/internal/domain"
+	"startup_back/internal/dto"
 )
 type authService struct {
 	UserService     UserService
@@ -19,7 +20,7 @@ func NewAuthService(userSvc UserService, passSvc PasswordService,tokenSvc TokenS
 	}
 }
 
-func (s *authService) SignUpUser(ctx context.Context, input CreateUserInput) (response AuthResponse, err error) {
+func (s *authService) SignUpUser(ctx context.Context, input dto.CreateUserInput) (response AuthResponse, err error) {
 	user,err:= s.UserService.GetUserByEmail(ctx, input.Email)
 	if err == nil && user.ID != 0 {
 		return AuthResponse{}, errors.New("User already exists")
@@ -33,7 +34,7 @@ func (s *authService) SignUpUser(ctx context.Context, input CreateUserInput) (re
 		Email: input.Email,
 		PasswordHash: hashPassword,
 	}
-	createUser, err := s.UserService.CreateUser(ctx, CreateUserInput{
+	createUser, err := s.UserService.CreateUser(ctx, dto.CreateUserInput{
 		Username: newUser.Username,
 		Email: newUser.Email,
 		Password: hashPassword,

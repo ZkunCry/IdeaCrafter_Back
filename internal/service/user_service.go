@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"startup_back/internal/domain"
+	"startup_back/internal/dto"
 	"startup_back/internal/repository"
 )
 type userService struct{
@@ -12,7 +13,7 @@ type userService struct{
 func NewUserService(repo repository.UserRepository) UserService{
 	return &userService{repo:repo}
 }
-func (s *userService) CreateUser(ctx context.Context, input CreateUserInput) (*domain.User, error) {
+func (s *userService) CreateUser(ctx context.Context, input dto.CreateUserInput) (*domain.User, error) {
 	user,err := s.repo.Create(ctx,&domain.User{
 		Username:input.Username,
 		Email:input.Email,
@@ -32,7 +33,7 @@ func (s *userService)	GetUserById(ctx context.Context,id uint)(*domain.User, err
 	}
  return user,nil
 }
-func (s *userService)	UpdateUser(ctx context.Context,id uint,input CreateUserInput) error{
+func (s *userService)	UpdateUser(ctx context.Context,id uint,input dto.CreateUserInput) error{
 	err:= s.repo.Update(ctx,id,&domain.User{
 		Username:input.Username,
 		Email:input.Email,

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"startup_back/internal/dto"
 	"startup_back/internal/service"
 
 	"github.com/gofiber/fiber/v2"
@@ -19,7 +20,7 @@ func NewAuthHandler(service *service.Services) * AuthHandler{
 }
 func (h *AuthHandler) SignUp(c *fiber.Ctx) error {
  
-  var input service.CreateUserInput
+  var input dto.CreateUserInput
   if err := c.BodyParser(&input); err != nil {
       return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid input"})
    }
@@ -56,7 +57,7 @@ func (h *AuthHandler) SignUp(c *fiber.Ctx) error {
 }
 
 func (h *AuthHandler) SignIn(c *fiber.Ctx) error {
-  var input service.CreateUserInput
+  var input dto.CreateUserInput
   if err := c.BodyParser(&input); err != nil {
       return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid input"})
    }

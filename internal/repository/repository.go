@@ -17,7 +17,7 @@ type UserRepository interface {
 }
 
 type StartupRepository interface {
-    Create(ctx context.Context, startup *domain.Startup, categoryIDs []uint) error
+    Create(ctx context.Context, startup *domain.Startup, categoryIDs []uint, vacancyRoleIDs []uint) (*domain.Startup, error)
     GetByID(ctx context.Context, id uint) (*domain.Startup, error)
     List(ctx context.Context, limit, offset int, categoryID uint) ([]*domain.Startup, error)
     Delete(ctx context.Context, id uint) error
