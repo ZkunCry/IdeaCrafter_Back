@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"startup_back/internal/domain"
 	"startup_back/internal/dto"
 	"startup_back/internal/repository"
@@ -16,8 +17,13 @@ type startupService struct{
 func NewStartupService(repo repository.StartupRepository) StartupService{
 	return &startupService{repo:repo}
 }
-func (s * startupService) Create (ctx context.Context, startup *dto.CreateStartupInput, categoryIDs []uint, vacancyRoleIDs []uint) (*domain.Startup, error) {
- startupCreated,err := s.repo.Create(ctx, &domain.Startup{Name: startup.Name, Description: startup.Description}, categoryIDs, vacancyRoleIDs)
+func (s * startupService) Create (ctx context.Context, startup *dto.CreateStartupInput, categoryIDs []uint) (*domain.Startup, error) {
+	fmt.Println("create")
+	if(s.repo == nil){
+		return nil,fmt.Errorf("repo is nil")
+	}
+ startupCreated,err := s.repo.Create(ctx, &domain.Startup{Name: startup.Name, Description: startup.Description, CreatorID: startup.CreatorId}, categoryIDs)
+ 
  if err != nil {
 	return nil,err
  }
@@ -32,8 +38,8 @@ func (s * startupService) GetByID(ctx context.Context, id uint) (*domain.Startup
 	return startup,nil
 }
 
-func (s * startupService) List(ctx context.Context, limit, offset int, categoryID uint) ([]*domain.Startup, error) {
-	startups, err := s.repo.List(ctx,limit,offset,categoryID)
+func (s * startupService) List(ctx context.Context, limit, offset int) ([]*domain.Startup, error) {
+	startups, err := s.repo.List(ctx,limit,offset)
 	if err !=nil{
 		return nil,err
 	}

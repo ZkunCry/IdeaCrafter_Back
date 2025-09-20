@@ -15,7 +15,7 @@ func NewStartupRepository(db *gorm.DB) StartupRepository {
 	return &startupRepository{db: db}
 }
 
-func (s *startupRepository) Create(ctx context.Context, startup *domain.Startup, categoryIDs []uint, vacancyRoleIDs []uint) (*domain.Startup, error) {
+func (s *startupRepository) Create(ctx context.Context, startup *domain.Startup, categoryIDs []uint) (*domain.Startup, error) {
 	err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(startup).Error; err != nil {
 			return err
@@ -29,19 +29,6 @@ func (s *startupRepository) Create(ctx context.Context, startup *domain.Startup,
 				return err
 			}
 		}
-
-		if len(vacancyRoleIDs) > 0 {
-			var vacancies []domain.Vacancy
-			for _, roleID := range vacancyRoleIDs {
-				vacancies = append(vacancies, domain.Vacancy{
-					RoleID:    roleID,
-					StartupID: startup.ID,
-				})
-			}
-			if err := tx.Create(&vacancies).Error; err != nil {
-				return err
-			}
-		}
 		return nil
 	})
 
@@ -51,8 +38,8 @@ func (s *startupRepository) Create(ctx context.Context, startup *domain.Startup,
 
 	if err := s.db.WithContext(ctx).
 		Preload("Categories").
-		Preload("Vacancies.Role").
 		Preload("Files").
+		Preload("Memberships").
 		First(startup, startup.ID).Error; err != nil {
 		return nil, err
 	}
@@ -68,7 +55,7 @@ func (s *startupRepository) GetByID(ctx context.Context, id uint) (*domain.Start
 	}
 	return &startup, nil
 }
-func (s *startupRepository)  List(ctx context.Context, limit, offset int, categoryID uint) ([]*domain.Startup, error){
+func (s *startupRepository)  List(ctx context.Context, limit, offset int) ([]*domain.Startup, error){
 	var startups []*domain.Startup
 	query := s.db.WithContext(ctx).
 	Preload("Creator").
@@ -77,11 +64,7 @@ func (s *startupRepository)  List(ctx context.Context, limit, offset int, catego
 	Preload("Files").
 	Limit(limit).
 	Offset(offset)
-	if categoryID != 0 {
-		query = query.Joins(
-			"JOIN startup_categories sc ON sc.startup_id = startups.id").
-			Where("sc.category_id = ?",categoryID)
-	}
+
 
 	if err := query.Find(&startups).Error; err != nil {
 		return nil, err

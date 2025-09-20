@@ -11,6 +11,7 @@ type Startup struct {
     Categories  []Category    `gorm:"many2many:startup_categories" json:"categories"` 
     Files       []StartupFile `gorm:"foreignKey:StartupID;constraint:OnDelete:CASCADE;" json:"files"`
     Vacancies []Vacancy       `gorm:"foreignKey:StartupID;constraint:OnDelete:CASCADE;" json:"vacancies"`
+    Memberships []Membership  `gorm:"foreignKey:StartupID;constraint:OnDelete:CASCADE;" json:"memberships"`
 }
 
 type CreateStartupInput struct {

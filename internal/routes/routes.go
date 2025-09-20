@@ -25,4 +25,6 @@ func SetupRoutes ( app *fiber.App ,handlers *handler.Handlers,services *service.
 	auth.Post("/signin", handlers.Auth.SignIn)
 	startup:=api.Group("/startup")
 	startup.Post("/", middleware.RequireAuth(services.Token), handlers.Startup.CreateStartup)
+	startup.Get("/list", handlers.Startup.GetListStartups)
+
 }
