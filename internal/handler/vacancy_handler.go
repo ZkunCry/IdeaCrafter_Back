@@ -46,6 +46,7 @@ func (h *VacancyHandler) GetVacancyByID(c *fiber.Ctx) error {
 		Description: vacancy.Description,
 		StartupID:   vacancy.StartupID,
 		IsOpen:      vacancy.IsOpen,
+		Role:        vacancy.Role,
 	}
 	return c.JSON(vacancyResponse)
 }

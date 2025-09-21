@@ -35,6 +35,7 @@ type Repositories struct {
     User          UserRepository
     Startup       StartupRepository
 		Vacancy       VacancyRepository
+		Role          RoleRepository
 }
 
 func NewRespositories(db *gorm.DB) * Repositories{
@@ -42,5 +43,6 @@ func NewRespositories(db *gorm.DB) * Repositories{
 		User : NewUserRepository(db),
 		Startup: NewStartupRepository(db),
 		Vacancy: NewVacancyRepository(db),
+		Role: NewRoleRepository(db),
 	}
 }
