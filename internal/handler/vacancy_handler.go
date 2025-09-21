@@ -30,6 +30,8 @@ func (h * VacancyHandler) CreateVacancy(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(vacancy)
 }
 
+
+
 func (h *VacancyHandler) GetVacancyByID(c *fiber.Ctx) error {
 	id, err := parseUintParam(c, "id")
 	if err != nil {
@@ -50,6 +52,7 @@ func (h *VacancyHandler) GetVacancyByID(c *fiber.Ctx) error {
 	}
 	return c.JSON(vacancyResponse)
 }
+
 
 func (h *VacancyHandler) GetVacanciesByStartup(c *fiber.Ctx) error {
 	startupID, err := parseUintParam(c, "startupID")

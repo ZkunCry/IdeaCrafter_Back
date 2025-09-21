@@ -17,7 +17,8 @@ func SetupRoutes ( app *fiber.App ,handlers *handler.Handlers,services *service.
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
 		AllowMethods: "GET, POST, PATCH, DELETE, OPTIONS",
 		AllowCredentials: true,
-	}))
+	}))	
+
 
 	api := app.Group("/api")
 	auth:=api.Group("/auth")
