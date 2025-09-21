@@ -35,4 +35,6 @@ func SetupRoutes ( app *fiber.App ,handlers *handler.Handlers,services *service.
 	vacancy.Get("/startup/:id", middleware.RequireAuth(services.Token), handlers.Vacancy.GetVacanciesByStartup)
 	vacancy.Put("/:id", middleware.RequireAuth(services.Token), handlers.Vacancy.UpdateVacancy)
 
+	role := api.Group("/role")
+	role.Post("/", middleware.RequireAuth(services.Token), handlers.Role.CreateRole)
 }

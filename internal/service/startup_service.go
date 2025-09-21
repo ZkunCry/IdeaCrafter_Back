@@ -11,7 +11,7 @@ import (
 type StartupService interface {
 	Create(ctx context.Context, startup *dto.CreateStartupInput, categoryIDs []uint) (*domain.Startup, error)
   GetByID(ctx context.Context, id uint) (*domain.Startup, error)
-  List(ctx context.Context, limit, offset int) ([]*domain.Startup, error)
+  GetAll(ctx context.Context, limit, offset int) ([]*domain.Startup, error)
   Delete(ctx context.Context, id uint) error	
 }
 type startupService struct{
@@ -43,8 +43,8 @@ func (s * startupService) GetByID(ctx context.Context, id uint) (*domain.Startup
 	return startup,nil
 }
 
-func (s * startupService) List(ctx context.Context, limit, offset int) ([]*domain.Startup, error) {
-	startups, err := s.repo.List(ctx,limit,offset)
+func (s * startupService) GetAll(ctx context.Context, limit, offset int) ([]*domain.Startup, error) {
+	startups, err := s.repo.GetAll(ctx,limit,offset)
 	if err !=nil{
 		return nil,err
 	}

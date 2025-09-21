@@ -19,6 +19,11 @@ func (v *vacancyRepository) Create(ctx context.Context, vacancy *domain.Vacancy)
 	if err := v.db.WithContext(ctx).Create(vacancy).Error; err != nil {
 		return nil, err
 	}
+	if err := v.db.WithContext(ctx).
+        Preload("Role").
+        First(vacancy, vacancy.ID).Error; err != nil {
+        return nil, err
+    }
 	return vacancy, nil
 }
 
@@ -37,8 +42,6 @@ func (v *vacancyRepository) Update(ctx context.Context, id uint, vacancy *domain
     }
     existing.Description = vacancy.Description
     existing.IsOpen = vacancy.IsOpen
-    // existing.RoleID = vacancy.RoleID 
-
     if err := v.db.WithContext(ctx).Save(&existing).Error; err != nil {
         return nil, err
     }

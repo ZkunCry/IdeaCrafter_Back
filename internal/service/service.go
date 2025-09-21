@@ -18,6 +18,7 @@ type Services struct {
 		Auth AuthService
 		Startup StartupService
 		Vacancy VacancyService
+		Role RoleService
 
 }
 
@@ -29,5 +30,6 @@ func NewServices(repos *repository.Repositories,cfg *config.Config) *Services{
 		Auth: NewAuthService(NewUserService(repos.User),NewPasswordService(),NewTokenService(cfg.JWT.AccessSecret,cfg.JWT.RefreshSecret)),
 		Startup: NewStartupService(repos.Startup),
 		Vacancy: NewVacancyService(repos.Vacancy),
+		Role: NewRoleService(repos.Role),	
 	}
 }

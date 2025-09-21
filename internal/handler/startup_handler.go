@@ -44,7 +44,7 @@ func (s * StartupHandler) GetListStartups(c * fiber.Ctx) error{
 	if err := c.QueryParser(&inputs); err != nil{
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid input"})
 	}
-	startups,err := s.services.Startup.List(c.Context(),inputs.Limit,inputs.Offset)
+	startups,err := s.services.Startup.GetAll(c.Context(),inputs.Limit,inputs.Offset)
 	if err != nil{
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}

@@ -55,7 +55,7 @@ func (s *startupRepository) GetByID(ctx context.Context, id uint) (*domain.Start
 	}
 	return &startup, nil
 }
-func (s *startupRepository)  List(ctx context.Context, limit, offset int) ([]*domain.Startup, error){
+func (s *startupRepository) GetAll(ctx context.Context, limit, offset int) ([]*domain.Startup, error){
 	var startups []*domain.Startup
 	query := s.db.WithContext(ctx).
 	Preload("Creator").

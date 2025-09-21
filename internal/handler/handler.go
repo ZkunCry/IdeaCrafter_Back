@@ -8,6 +8,7 @@ type Handlers struct {
 	Auth *AuthHandler
 	Startup *StartupHandler
 	Vacancy * VacancyHandler
+	Role *RoleHandler
 }
 
 func NewHandlers(services * service.Services) *Handlers {
@@ -16,5 +17,6 @@ func NewHandlers(services * service.Services) *Handlers {
 		Auth: NewAuthHandler(services),
 		Startup: NewStartupHandler(services),
 		Vacancy:  NewVacancyHandler(services),
+		Role: NewRoleHandler(services),
 	}
 }
