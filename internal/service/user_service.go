@@ -6,6 +6,14 @@ import (
 	"startup_back/internal/dto"
 	"startup_back/internal/repository"
 )
+
+type UserService interface{
+	CreateUser(ctx context.Context,input dto.CreateUserInput)(*domain.User, error)
+	GetUserById(ctx context.Context,id uint)(*domain.User, error)
+	GetUserByEmail(ctx context.Context,email string)(*domain.User, error)
+	UpdateUser(ctx context.Context,id uint,input dto.CreateUserInput)error
+}
+
 type userService struct{
 	repo repository.UserRepository
 }

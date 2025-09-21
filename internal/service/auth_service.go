@@ -6,6 +6,12 @@ import (
 	"startup_back/internal/domain"
 	"startup_back/internal/dto"
 )
+type AuthService interface{
+	SignInUser(ctx context.Context, email, password string) (response AuthResponse, err error)
+	SignUpUser(ctx context.Context, input dto.CreateUserInput)  (response AuthResponse, err error)
+}
+
+
 type authService struct {
 	UserService     UserService
 	PasswordService PasswordService

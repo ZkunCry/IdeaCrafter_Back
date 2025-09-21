@@ -9,7 +9,10 @@ import (
 
 	"golang.org/x/crypto/argon2"
 )
-
+type PasswordService interface{
+	HashPassword(password string) (string, error)
+  ComparePassword(hashedPassword, password string) error
+}
 type passwordService struct {
 	
 }

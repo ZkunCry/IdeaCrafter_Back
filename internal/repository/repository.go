@@ -22,16 +22,25 @@ type StartupRepository interface {
     List(ctx context.Context, limit, offset int) ([]*domain.Startup, error)
     Delete(ctx context.Context, id uint) error
 }
+type VacancyRepository interface {
+	Create(ctx context.Context, vacancy *domain.Vacancy) (*domain.Vacancy, error)
+	GetByID(ctx context.Context, id uint) (*domain.Vacancy, error)
+	Update(ctx context.Context, id uint, vacancy *domain.Vacancy) (*domain.Vacancy, error)
+	Delete(ctx context.Context, id uint) error
 
+	GetByStartupID(ctx context.Context, startupID uint) ([]*domain.Vacancy, error)
+	GetAll(ctx context.Context) ([]*domain.Vacancy, error)
+}
 type Repositories struct {
     User          UserRepository
     Startup       StartupRepository
-
+		Vacancy       VacancyRepository
 }
 
 func NewRespositories(db *gorm.DB) * Repositories{
 	return &Repositories{
 		User : NewUserRepository(db),
 		Startup: NewStartupRepository(db),
+		Vacancy: NewVacancyRepository(db),
 	}
 }

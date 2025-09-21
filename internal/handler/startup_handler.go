@@ -25,7 +25,18 @@ func (s *StartupHandler) CreateStartup(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
-	return c.Status(fiber.StatusOK).JSON(startup)
+	startupResponse := dto.StartupResponse{
+		ID:          startup.ID,
+		Name:        startup.Name,
+		Description: startup.Description,
+		CreatorID:   startup.CreatorID,
+		Creator:     startup.Creator,
+		Categories:  startup.Categories,
+		Files:       startup.Files,
+		Vacansies:   startup.Vacancies,
+		Memberships: startup.Memberships,
+	}
+	return c.Status(fiber.StatusOK).JSON(startupResponse)
 }
 
 func (s * StartupHandler) GetListStartups(c * fiber.Ctx) error{
@@ -37,5 +48,19 @@ func (s * StartupHandler) GetListStartups(c * fiber.Ctx) error{
 	if err != nil{
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
-	return c.Status(fiber.StatusOK).JSON(startups)
+	startupResponse:=[]dto.StartupResponse{}
+	for _,startup := range startups{
+		startupResponse = append(startupResponse, dto.StartupResponse{
+			ID:          startup.ID,
+			Name:        startup.Name,
+			Description: startup.Description,
+			CreatorID:   startup.CreatorID,
+			Creator:     startup.Creator,
+			Categories:  startup.Categories,
+			Files:       startup.Files,
+			Vacansies:   startup.Vacancies,
+			Memberships: startup.Memberships,
+		})
+	}
+	return c.Status(fiber.StatusOK).JSON(startupResponse)
 }

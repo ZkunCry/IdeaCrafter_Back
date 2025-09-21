@@ -7,7 +7,7 @@ import (
 type Handlers struct {
 	Auth *AuthHandler
 	Startup *StartupHandler
-
+	Vacancy * VacancyHandler
 }
 
 func NewHandlers(services * service.Services) *Handlers {
@@ -15,5 +15,6 @@ func NewHandlers(services * service.Services) *Handlers {
 	return &Handlers{
 		Auth: NewAuthHandler(services),
 		Startup: NewStartupHandler(services),
+		Vacancy:  NewVacancyHandler(services),
 	}
 }

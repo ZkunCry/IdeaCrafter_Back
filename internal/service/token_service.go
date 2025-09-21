@@ -6,6 +6,11 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 )
+type TokenService interface{
+	GenerateAccessToken(userId uint) (string, error)
+	GenerateRefreshToken(userId uint) (string, error)
+	ValidateAccessToken(tokenString string) (uint, error)
+}
 
 type tokenService struct{
 	accessSecret []byte

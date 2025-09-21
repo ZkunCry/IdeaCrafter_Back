@@ -8,7 +8,12 @@ import (
 
 	"context"
 )
-
+type StartupService interface {
+	Create(ctx context.Context, startup *dto.CreateStartupInput, categoryIDs []uint) (*domain.Startup, error)
+  GetByID(ctx context.Context, id uint) (*domain.Startup, error)
+  List(ctx context.Context, limit, offset int) ([]*domain.Startup, error)
+  Delete(ctx context.Context, id uint) error	
+}
 type startupService struct{
 	repo repository.StartupRepository
 
