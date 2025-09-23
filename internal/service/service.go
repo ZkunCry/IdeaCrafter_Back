@@ -19,6 +19,7 @@ type Services struct {
 		Startup StartupService
 		Vacancy VacancyService
 		Role RoleService
+		Application ApplicationService
 
 }
 
@@ -31,5 +32,6 @@ func NewServices(repos *repository.Repositories,cfg *config.Config) *Services{
 		Startup: NewStartupService(repos.Startup),
 		Vacancy: NewVacancyService(repos.Vacancy),
 		Role: NewRoleService(repos.Role),	
+		Application: NewApplicationService(repos.Application),
 	}
 }

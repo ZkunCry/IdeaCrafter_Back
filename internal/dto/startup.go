@@ -24,5 +24,5 @@ type StartupResponse struct{
 	Categories  []domain.Category `json:"categories"`
 	Files       []domain.StartupFile `json:"files"`
 	Vacansies   []domain.Vacancy `json:"vacancies"`
-	Memberships []domain.Membership `json:"memberships"`
+
 }

@@ -6,7 +6,12 @@ import (
 
 	"gorm.io/gorm"
 )
-
+type StartupRepository interface {
+    Create(ctx context.Context, startup *domain.Startup, categoryIDs []uint) (*domain.Startup, error)
+    GetByID(ctx context.Context, id uint) (*domain.Startup, error)
+    GetAll(ctx context.Context, limit, offset int) ([]*domain.Startup, error)
+    Delete(ctx context.Context, id uint) error
+}
 type startupRepository struct {
 	db *gorm.DB
 }

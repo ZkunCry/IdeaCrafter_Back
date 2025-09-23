@@ -10,4 +10,6 @@ type Vacancy struct{
 	Role  Role 		`gorm:"foreignKey:RoleID;constraint:OnDelete:CASCADE;" json:"role"`
 	Description string `json:"description"`
 	IsOpen bool `gorm:"default:true" json:"is_open"`
+	UserID *uint `gorm:"default:null" json:"user_id"` 
+  User   *User `gorm:"foreignKey:UserID" json:"user"`
 }

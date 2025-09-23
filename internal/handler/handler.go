@@ -9,6 +9,7 @@ type Handlers struct {
 	Startup *StartupHandler
 	Vacancy * VacancyHandler
 	Role *RoleHandler
+	Application *ApplicationHandler
 }
 
 func NewHandlers(services * service.Services) *Handlers {
@@ -18,5 +19,6 @@ func NewHandlers(services * service.Services) *Handlers {
 		Startup: NewStartupHandler(services),
 		Vacancy:  NewVacancyHandler(services),
 		Role: NewRoleHandler(services),
+		Application: NewApplicationHandler(services),
 	}
 }

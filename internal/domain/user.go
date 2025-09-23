@@ -9,5 +9,5 @@ type User struct {
     PasswordHash string    `gorm:"not null" json:"-"` 
     Startups     []Startup `gorm:"foreignKey:CreatorID" json:"startups"` 
     Favorites    []Favorite `gorm:"foreignKey:UserID" json:"favorites"`
-    Memberships  []Membership `gorm:"foreignKey:UserID" json:"memberships"`
+
 }

@@ -6,7 +6,14 @@ import (
 
 	"gorm.io/gorm"
 )
-
+type VacancyRepository interface {
+	Create(ctx context.Context, vacancy *domain.Vacancy) (*domain.Vacancy, error)
+	GetByID(ctx context.Context, id uint) (*domain.Vacancy, error)
+	Update(ctx context.Context, id uint, vacancy *domain.Vacancy) (*domain.Vacancy, error)
+	Delete(ctx context.Context, id uint) error
+	GetByStartupID(ctx context.Context, startupID uint) ([]*domain.Vacancy, error)
+	GetAll(ctx context.Context) ([]*domain.Vacancy, error)
+}
 type vacancyRepository struct {
 	db *gorm.DB
 }

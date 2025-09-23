@@ -38,4 +38,11 @@ func SetupRoutes ( app *fiber.App ,handlers *handler.Handlers,services *service.
 
 	role := api.Group("/role")
 	role.Post("/", middleware.RequireAuth(services.Token), handlers.Role.CreateRole)
+
+	application := api.Group("/application")
+	application.Post("/", middleware.RequireAuth(services.Token), handlers.Application.CreateApplication)
+	// application.Get("/vacancy/:id", middleware.RequireAuth(services.Token), handlers.Application.)
+	application.Get("/:id", middleware.RequireAuth(services.Token), handlers.Application.GetApplicationByID)
+	application.Put("/:id", middleware.RequireAuth(services.Token), handlers.Application.UpdateApplication)
+	application.Put("/statuc/:id", middleware.RequireAuth(services.Token), handlers.Application.UpdateApplicationStatus) 
 }

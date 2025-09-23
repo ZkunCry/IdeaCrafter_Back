@@ -34,7 +34,7 @@ func (s *StartupHandler) CreateStartup(c *fiber.Ctx) error {
 		Categories:  startup.Categories,
 		Files:       startup.Files,
 		Vacansies:   startup.Vacancies,
-		Memberships: startup.Memberships,
+
 	}
 	return c.Status(fiber.StatusOK).JSON(startupResponse)
 }
@@ -59,7 +59,7 @@ func (s * StartupHandler) GetListStartups(c * fiber.Ctx) error{
 			Categories:  startup.Categories,
 			Files:       startup.Files,
 			Vacansies:   startup.Vacancies,
-			Memberships: startup.Memberships,
+
 		})
 	}
 	return c.Status(fiber.StatusOK).JSON(startupResponse)
