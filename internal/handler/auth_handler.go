@@ -18,6 +18,16 @@ type UserResponse struct {
 func NewAuthHandler(service *service.Services) * AuthHandler{
 	return &AuthHandler{service: service}
 }
+// Signup user
+// @Summary Register a new user
+// @Description Создает нового пользователя
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param user body domain.User true "User info"
+// @Success 201 {object} domain.User
+// @Failure 400 {object} map[string]string
+// @Router /api/auth/signup [post]
 func (h *AuthHandler) SignUp(c *fiber.Ctx) error {
  
   var input dto.CreateUserInput
@@ -25,7 +35,7 @@ func (h *AuthHandler) SignUp(c *fiber.Ctx) error {
       return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid input"})
    }
   
-   resultUser,err:=   h.service.Auth.SignUpUser(c.Context(), input)
+   resultUser,err:=  h.service.Auth.SignUpUser(c.Context(), input)
    if err != nil {
        return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
    }
@@ -89,4 +99,17 @@ func (h *AuthHandler) SignIn(c *fiber.Ctx) error {
     Email:    resultUser.User.Email,
   }
    return c.Status(fiber.StatusOK).JSON(response)
+}
+
+func (h * AuthHandler) IdentityMe(c *fiber.Ctx) error {
+  user, err := h.service.Auth.IdentityMe(c.Context())
+  if err != nil {
+      return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+  }
+  response := UserResponse{
+    ID:       user.User.ID,
+    Username: user.User.Username,
+    Email:    user.User.Email,
+  }
+  return c.Status(fiber.StatusOK).JSON(response)
 }

@@ -9,6 +9,7 @@ import (
 type AuthService interface{
 	SignInUser(ctx context.Context, email, password string) (response AuthResponse, err error)
 	SignUpUser(ctx context.Context, input dto.CreateUserInput)  (response AuthResponse, err error)
+	IdentityMe(ctx context.Context) (response AuthResponse, err error)
 }
 
 
@@ -90,3 +91,20 @@ func (s *authService) SignInUser(ctx context.Context, email, password string) (r
 		RefreshToken: refreshToken,
 	}, nil
 }
+
+func (s *authService) IdentityMe(ctx context.Context) (response AuthResponse, err error) {
+	userID,err:=s.TokenService.ValidateAccessToken(ctx.Value("access_token").(string))
+
+	if err != nil{
+		return AuthResponse{}, errors.New("invalid or expired token")
+	}
+	user, err := s.UserService.GetUserById(ctx, userID)
+	if err != nil {
+		return AuthResponse{}, err
+	}
+	return AuthResponse{
+		User: user,
+	}, nil
+
+}
+

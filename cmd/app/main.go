@@ -11,11 +11,29 @@ import (
 
 	"github.com/sirupsen/logrus"
 
+	_ "startup_back/docs"
+
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/swagger"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
+// @title Startup API
+// @version 1.0
+// @description API для управления стартапами, вакансиями и пользователями
+// @termsOfService http://example.com/terms/
+
+// @contact.name API Support
+// @contact.url http://www.example.com/support
+// @contact.email support@example.com
+
+// @license.name MIT
+// @license.url https://opensource.org/licenses/MIT
+
+// @host localhost:3001
+// @BasePath /api
 
 func main() {
 	cfg, err := config.LoadConfig()
@@ -63,6 +81,7 @@ func main() {
 			return c.Status(code).JSON(fiber.Map{"error":err.Error()})
 		},
 	})
+	app.Get("/swagger/*", swagger.HandlerDefault)
 	routes.SetupRoutes(app,handlers,services)
 	address := fmt.Sprintf("%s:%s", cfg.Server.Host,cfg.Server.Port)
 	logrus.Infof("Starting server on %s", address)

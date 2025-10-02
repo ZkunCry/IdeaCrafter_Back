@@ -1,0 +1,16 @@
+basePath: /api
+host: localhost:3001
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+    url: http://www.example.com/support
+  description: API для управления стартапами, вакансиями и пользователями
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://example.com/terms/
+  title: Startup API
+  version: "1.0"
+paths: {}
+swagger: "2.0"
