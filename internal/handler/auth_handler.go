@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"startup_back/internal/dto"
 	"startup_back/internal/service"
 
@@ -102,7 +103,8 @@ func (h *AuthHandler) SignIn(c *fiber.Ctx) error {
 }
 
 func (h * AuthHandler) IdentityMe(c *fiber.Ctx) error {
-  user, err := h.service.Auth.IdentityMe(c.Context())
+  user, err := h.service.Auth.IdentityMe(c.Context(), c.Cookies("access_token"))
+  fmt.Println(user)
   if err != nil {
       return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
   }
@@ -112,4 +114,22 @@ func (h * AuthHandler) IdentityMe(c *fiber.Ctx) error {
     Email:    user.User.Email,
   }
   return c.Status(fiber.StatusOK).JSON(response)
+}
+
+func (h * AuthHandler) Refresh(c *fiber.Ctx) error {
+  accessToken, err := h.service.Auth.RefreshToken(c.Context(), c.Cookies("refresh_token"))
+  
+  if err != nil {
+      return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+  }
+  c.Cookie(&fiber.Cookie{
+    Name:     "access_token",
+    Value:    accessToken,
+    HTTPOnly: true,
+    Secure:   true,       
+    SameSite: "Strict",  
+    Path:     "/",
+    MaxAge:   900,        
+  })
+  return c.Status(fiber.StatusOK).JSON(fiber.Map{"access_token": accessToken})
 }

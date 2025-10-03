@@ -10,6 +10,7 @@ type TokenService interface{
 	GenerateAccessToken(userId uint) (string, error)
 	GenerateRefreshToken(userId uint) (string, error)
 	ValidateAccessToken(tokenString string) (uint, error)
+	ValidateRefreshToken(tokenString string) (uint, error)
 }
 
 type tokenService struct{
@@ -56,6 +57,37 @@ func (s *tokenService) ValidateAccessToken(tokenString string) (uint, error) {
 	}
 	if !token.Valid {
 		return 0, errors.New("invalid token")
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return 0, errors.New("invalid claims type")
+	}
+
+	uidFloat, ok := claims["user_id"].(float64)
+	if !ok {
+		return 0, errors.New("user_id not found in token")
+	}
+
+	return uint(uidFloat), nil
+}
+
+
+func (s *tokenService) ValidateRefreshToken(tokenString string) (uint, error) {
+	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, jwt.ErrSignatureInvalid
+		}
+		return s.refreshSecret, nil
+	})
+
+	if err != nil {
+		return 0, err
+	}
+
+	if !token.Valid {
+		return 0, errors.New("invalid refresh token")
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)

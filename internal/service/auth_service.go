@@ -3,13 +3,15 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"startup_back/internal/domain"
 	"startup_back/internal/dto"
 )
 type AuthService interface{
 	SignInUser(ctx context.Context, email, password string) (response AuthResponse, err error)
 	SignUpUser(ctx context.Context, input dto.CreateUserInput)  (response AuthResponse, err error)
-	IdentityMe(ctx context.Context) (response AuthResponse, err error)
+	IdentityMe(ctx context.Context, token string) (response AuthResponse, err error)
+	RefreshToken(ctx context.Context, refreshToken string) (response string, err error)
 }
 
 
@@ -92,19 +94,34 @@ func (s *authService) SignInUser(ctx context.Context, email, password string) (r
 	}, nil
 }
 
-func (s *authService) IdentityMe(ctx context.Context) (response AuthResponse, err error) {
-	userID,err:=s.TokenService.ValidateAccessToken(ctx.Value("access_token").(string))
+func (s *authService) IdentityMe(ctx context.Context, token string) (response AuthResponse, err error) {
+    if token == "" {
+        return AuthResponse{}, errors.New("access token not provided")
+    }
+    userID, err := s.TokenService.ValidateAccessToken(token)
+		fmt.Printf("user id %d", userID)
+    if err != nil {
+        return AuthResponse{}, errors.New("invalid or expired token")
+    }
+    user, err := s.UserService.GetUserById(ctx, userID)
+		fmt.Printf("user %v", user)
+    if err != nil {
+        return AuthResponse{}, err
+    }
 
-	if err != nil{
-		return AuthResponse{}, errors.New("invalid or expired token")
-	}
-	user, err := s.UserService.GetUserById(ctx, userID)
-	if err != nil {
-		return AuthResponse{}, err
-	}
-	return AuthResponse{
-		User: user,
-	}, nil
-
+    return AuthResponse{
+        User: user,
+    }, nil
 }
 
+func (s *authService) RefreshToken(ctx context.Context, refreshToken string) (response string, err error) {
+		userID, err := s.TokenService.ValidateRefreshToken(refreshToken)
+		if err != nil {
+				return "", errors.New("invalid or expired refresh token")
+		}
+		accessToken, err := s.TokenService.GenerateAccessToken(userID)
+		if err != nil {
+				return "", err
+		}
+		return accessToken, nil
+}
