@@ -7,3 +7,4 @@ type Stage struct {
 	Name     string     `gorm:"unique;not null" json:"name"`
 	Startups []Startup  `gorm:"foreignKey:StageID" json:"startups"`
 }
+

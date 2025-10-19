@@ -25,28 +25,28 @@ func NewStageService(repo repository.StageRepository) StageService {
 
 
 func (s *stageService) GetAll(ctx context.Context) ([]*domain.Stage, error) {
-	roles, err:= s.repo.GetAll(ctx)
+	stages, err:= s.repo.GetAll(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return roles,nil
+	return stages,nil
 }
 
 func (s *stageService) GetByID(ctx context.Context, id uint) (*domain.Stage, error) {
-	role, err := s.repo.GetByID(ctx, id)
+	stage, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	return role, nil
+	return stage, nil
 }
 
 func (s *stageService) Create(ctx context.Context, input *dto.CreateStageInput) (*domain.Stage, error) {
-	roleInput := &domain.Stage{Name: input.Name}
-	role, err := s.repo.Create(ctx, roleInput)
+	stageInput := &domain.Stage{Name: input.Name}
+	stage, err := s.repo.Create(ctx, stageInput)
 	if err != nil {
 		return nil, err
 	}
-	return role, nil
+	return stage, nil
 }
 
 func (s *stageService) Update(ctx context.Context, id uint, role *domain.Stage) error {

@@ -27,3 +27,10 @@ func (s *StageHandler) CreateStage(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(stage)
 }
 
+func (s * StageHandler) GetList(c * fiber.Ctx) error{
+	stages, err := s.services.Stage.GetAll(c.Context())
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.Status(fiber.StatusOK).JSON(stages)
+}
