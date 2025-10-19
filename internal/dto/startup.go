@@ -1,28 +1,40 @@
 package dto
 
-import (
-	"startup_back/internal/domain"
-)
+import "startup_back/internal/domain"
+
+
 type CreateStartupInput struct {
-	CreatorId   uint   `json:"creator_id"`
-	Name        string `json:"name" validate:"required"`
-	Description string `json:"description" validate:"required"`
-	CategoryIDs []uint `json:"category_ids" validate:"required"`
+	CreatorID        uint   `json:"creator_id"`                          
+	Name             string `json:"name" validate:"required"`              
+	ShortDescription string `json:"short_description" validate:"required"`
+	Description      string `json:"description" validate:"required"`     
+	TargetAudience   string `json:"target_audience"`                       
+	Problem          string `json:"problem"`                               
+	Solution         string `json:"solution"`                              
+	StageID          uint   `json:"stage_id"`                              
+	CategoryIDs      []uint `json:"category_ids" validate:"required"`     
 }
+
 
 type GetStartupList struct {
 	Limit  int `json:"limit"`
 	Offset int `json:"offset"`
 }
 
-type StartupResponse struct{
-	ID          uint   `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	CreatorID   uint   `json:"creator_id"`
-	Creator     domain.User   `json:"creator"`
-	Categories  []domain.Category `json:"categories"`
-	Files       []domain.StartupFile `json:"files"`
-	Vacansies   []domain.Vacancy `json:"vacancies"`
 
+type StartupResponse struct {
+	ID               uint                   `json:"id"`
+	Name             string                 `json:"name"`
+	ShortDescription string                 `json:"short_description"`
+	Description      string                 `json:"description"`
+	TargetAudience   string                 `json:"target_audience"`
+	Problem          string                 `json:"problem"`
+	Solution         string                 `json:"solution"`
+	StageID          uint                   `json:"stage_id"`
+	Stage            domain.Stage           `json:"stage"`
+	CreatorID        uint                   `json:"creator_id"`
+	Creator          domain.User            `json:"creator"`
+	Categories       []domain.Category      `json:"categories"`
+	Files            []domain.StartupFile   `json:"files"`
+	Vacansies []domain.Vacancy `json:"vacancies"`
 }

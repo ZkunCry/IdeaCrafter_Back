@@ -9,7 +9,7 @@ import (
 	"context"
 )
 type StartupService interface {
-	Create(ctx context.Context, startup *dto.CreateStartupInput, categoryIDs []uint) (*domain.Startup, error)
+	Create(ctx context.Context, input *dto.CreateStartupInput) (*domain.Startup, error)
   GetByID(ctx context.Context, id uint) (*domain.Startup, error)
   GetAll(ctx context.Context, limit, offset int) ([]*domain.Startup, error)
   Delete(ctx context.Context, id uint) error	
@@ -22,17 +22,28 @@ type startupService struct{
 func NewStartupService(repo repository.StartupRepository) StartupService{
 	return &startupService{repo:repo}
 }
-func (s * startupService) Create (ctx context.Context, startup *dto.CreateStartupInput, categoryIDs []uint) (*domain.Startup, error) {
-	fmt.Println("create")
-	if(s.repo == nil){
-		return nil,fmt.Errorf("repo is nil")
+func (s *startupService) Create(ctx context.Context, input *dto.CreateStartupInput) (*domain.Startup, error) {
+	if input == nil {
+		return nil, fmt.Errorf("input is nil")
 	}
- startupCreated,err := s.repo.Create(ctx, &domain.Startup{Name: startup.Name, Description: startup.Description, CreatorID: startup.CreatorId}, categoryIDs)
- 
- if err != nil {
-	return nil,err
- }
-return startupCreated,nil
+
+	startup := &domain.Startup{
+		Name:             input.Name,
+		Description:      input.Description,
+		ShortDescription: input.ShortDescription,
+		TargetAudience:   input.TargetAudience,
+		Problem:          input.Problem,
+		Solution:         input.Solution,
+		CreatorID:        input.CreatorID,
+		StageID:          input.StageID,
+	}
+
+	created, err := s.repo.Create(ctx, startup, input.CategoryIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	return created, nil
 }
 
 func (s * startupService) GetByID(ctx context.Context, id uint) (*domain.Startup, error) {

@@ -16,28 +16,52 @@ func NewStartupHandler(services *service.Services) *StartupHandler {
 }
 
 func (s *StartupHandler) CreateStartup(c *fiber.Ctx) error {
-	var inputs dto.CreateStartupInput
-	if err := c.BodyParser(&inputs); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid input"})
+	var input dto.CreateStartupInput
+
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid input format",
+		})
 	}
-	userID := c.Locals("user_id").(uint) 
-	startup,err := s.services.Startup.Create(c.Context(), &dto.CreateStartupInput{Name: inputs.Name, Description: inputs.Description, CreatorId: userID}, inputs.CategoryIDs)
+
+
+	userID, ok := c.Locals("user_id").(uint)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "unauthorized",
+		})
+	}
+
+
+	input.CreatorID = userID
+
+
+	startup, err := s.services.Startup.Create(c.Context(), &input)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
 	}
-	startupResponse := dto.StartupResponse{
+
+
+	response := dto.StartupResponse{
 		ID:          startup.ID,
 		Name:        startup.Name,
 		Description: startup.Description,
 		CreatorID:   startup.CreatorID,
+		TargetAudience: startup.TargetAudience,
+		Solution: startup.Solution,
+		ShortDescription: startup.ShortDescription,
 		Creator:     startup.Creator,
+		Problem: startup.Problem,
 		Categories:  startup.Categories,
 		Files:       startup.Files,
 		Vacansies:   startup.Vacancies,
-
 	}
-	return c.Status(fiber.StatusOK).JSON(startupResponse)
+
+	return c.Status(fiber.StatusOK).JSON(response)
 }
+
 
 func (s * StartupHandler) GetListStartups(c * fiber.Ctx) error{
 	var inputs dto.GetStartupList
@@ -52,13 +76,17 @@ func (s * StartupHandler) GetListStartups(c * fiber.Ctx) error{
 	for _,startup := range startups{
 		startupResponse = append(startupResponse, dto.StartupResponse{
 			ID:          startup.ID,
-			Name:        startup.Name,
-			Description: startup.Description,
-			CreatorID:   startup.CreatorID,
-			Creator:     startup.Creator,
-			Categories:  startup.Categories,
-			Files:       startup.Files,
-			Vacansies:   startup.Vacancies,
+		Name:        startup.Name,
+		Description: startup.Description,
+		CreatorID:   startup.CreatorID,
+		TargetAudience: startup.TargetAudience,
+		Solution: startup.Solution,
+		ShortDescription: startup.ShortDescription,
+		Creator:     startup.Creator,
+		Problem: startup.Problem,
+		Categories:  startup.Categories,
+		Files:       startup.Files,
+		Vacansies:   startup.Vacancies,
 
 		})
 	}

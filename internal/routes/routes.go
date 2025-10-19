@@ -49,4 +49,7 @@ func SetupRoutes ( app *fiber.App ,handlers *handler.Handlers,services *service.
 	application.Get("/:id", middleware.RequireAuth(services.Token), handlers.Application.GetApplicationByID)
 	application.Put("/:id", middleware.RequireAuth(services.Token), handlers.Application.UpdateApplication)
 	application.Put("/statuc/:id", middleware.RequireAuth(services.Token), handlers.Application.UpdateApplicationStatus) 
+
+	stage := api.Group("/stage")
+	stage.Post("/", middleware.RequireAuth(services.Token), handlers.Stage.CreateStage)
 }

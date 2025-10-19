@@ -10,6 +10,7 @@ type Handlers struct {
 	Vacancy * VacancyHandler
 	Role *RoleHandler
 	Application *ApplicationHandler
+	Stage *StageHandler	
 }
 
 func NewHandlers(services * service.Services) *Handlers {
@@ -20,5 +21,6 @@ func NewHandlers(services * service.Services) *Handlers {
 		Vacancy:  NewVacancyHandler(services),
 		Role: NewRoleHandler(services),
 		Application: NewApplicationHandler(services),
+		Stage: NewStageHandler(services),
 	}
 }

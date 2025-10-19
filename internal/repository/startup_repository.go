@@ -43,8 +43,8 @@ func (s *startupRepository) Create(ctx context.Context, startup *domain.Startup,
 
 	if err := s.db.WithContext(ctx).
 		Preload("Categories").
+			Preload("Stage").
 		Preload("Files").
-		Preload("Memberships").
 		First(startup, startup.ID).Error; err != nil {
 		return nil, err
 	}
@@ -67,6 +67,7 @@ func (s *startupRepository) GetAll(ctx context.Context, limit, offset int) ([]*d
 	Preload("Categories").
 	Preload("Vacancies").
 	Preload("Files").
+	Preload("Stage").
 	Limit(limit).
 	Offset(offset)
 

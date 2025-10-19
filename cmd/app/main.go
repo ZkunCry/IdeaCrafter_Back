@@ -8,6 +8,7 @@ import (
 	"startup_back/internal/repository"
 	"startup_back/internal/routes"
 	"startup_back/internal/service"
+	"time"
 
 	"github.com/sirupsen/logrus"
 
@@ -58,6 +59,7 @@ func main() {
 		&domain.Role{},
 		&domain.Vacancy{},
 		&domain.Application{},
+		&domain.Stage{},
 	)
 
 	if err != nil{
@@ -80,6 +82,27 @@ func main() {
 			}).Error("Request failed")
 			return c.Status(code).JSON(fiber.Map{"error":err.Error()})
 		},
+	})
+	app.Use(func(c *fiber.Ctx) error {
+		start := time.Now()
+		err := c.Next() // Продолжаем обработку запроса
+		duration := time.Since(start)
+
+		entry := logrus.WithFields(logrus.Fields{
+			"method":   c.Method(),
+			"path":     c.Path(),
+			"status":   c.Response().StatusCode(),
+			"latency":  duration,
+			"clientIP": c.IP(),
+		})
+
+		if err != nil {
+			entry.WithField("error", err.Error()).Error("Request failed")
+		} else {
+			entry.Info("Request completed")
+		}
+
+		return err
 	})
 	app.Get("/swagger/*", swagger.HandlerDefault)
 	routes.SetupRoutes(app,handlers,services)

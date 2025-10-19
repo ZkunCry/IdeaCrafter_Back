@@ -10,6 +10,7 @@ type Repositories struct {
 		Vacancy       VacancyRepository
 		Role          RoleRepository
 		Application   ApplicationRepository
+		Stage 				StageRepository
 }
 
 func NewRespositories(db *gorm.DB) * Repositories{
@@ -19,5 +20,6 @@ func NewRespositories(db *gorm.DB) * Repositories{
 		Vacancy: NewVacancyRepository(db),
 		Role: NewRoleRepository(db),
 		Application: NewApplicationRepository(db),
+		Stage: NewStageRepository(db),
 	}
 }
