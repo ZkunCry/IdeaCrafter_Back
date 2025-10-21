@@ -43,12 +43,12 @@ func (s *startupRepository) Create(ctx context.Context, startup *domain.Startup,
 
 	if err := s.db.WithContext(ctx).
 		Preload("Categories").
-			Preload("Stage").
+		Preload("Creator").
+		Preload("Stage").
 		Preload("Files").
 		First(startup, startup.ID).Error; err != nil {
 		return nil, err
 	}
-
 	return startup, nil
 }
 

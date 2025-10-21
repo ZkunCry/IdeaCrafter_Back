@@ -7,7 +7,7 @@ type User struct {
     Username     string    `gorm:"not null" json:"username"`
     Email        string    `gorm:"unique;not null" json:"email"`
     PasswordHash string    `gorm:"not null" json:"-"` 
-    Startups     []Startup `gorm:"foreignKey:CreatorID" json:"startups"` 
-    Favorites    []Favorite `gorm:"foreignKey:UserID" json:"favorites"`
+    Startups     []Startup `gorm:"foreignKey:CreatorID" json:"-"` 
+    Favorites    []Favorite `gorm:"foreignKey:UserID" json:"-"`
 
 }

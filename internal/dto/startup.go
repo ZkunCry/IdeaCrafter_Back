@@ -30,9 +30,7 @@ type StartupResponse struct {
 	TargetAudience   string                 `json:"target_audience"`
 	Problem          string                 `json:"problem"`
 	Solution         string                 `json:"solution"`
-	StageID          uint                   `json:"stage_id"`
 	Stage            domain.Stage           `json:"stage"`
-	CreatorID        uint                   `json:"creator_id"`
 	Creator          domain.User            `json:"creator"`
 	Categories       []domain.Category      `json:"categories"`
 	Files            []domain.StartupFile   `json:"files"`

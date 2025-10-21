@@ -42,7 +42,7 @@ func (s *startupService) Create(ctx context.Context, input *dto.CreateStartupInp
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Printf("Startup: %v\n\n",created)
 	return created, nil
 }
 

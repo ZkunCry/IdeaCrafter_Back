@@ -32,5 +32,6 @@ func (s * StageHandler) GetList(c * fiber.Ctx) error{
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
+	
 	return c.Status(fiber.StatusOK).JSON(stages)
 }

@@ -48,7 +48,6 @@ func (s *StartupHandler) CreateStartup(c *fiber.Ctx) error {
 		ID:          startup.ID,
 		Name:        startup.Name,
 		Description: startup.Description,
-		CreatorID:   startup.CreatorID,
 		TargetAudience: startup.TargetAudience,
 		Solution: startup.Solution,
 		ShortDescription: startup.ShortDescription,
@@ -57,6 +56,7 @@ func (s *StartupHandler) CreateStartup(c *fiber.Ctx) error {
 		Categories:  startup.Categories,
 		Files:       startup.Files,
 		Vacansies:   startup.Vacancies,
+		Stage: startup.Stage,
 	}
 
 	return c.Status(fiber.StatusOK).JSON(response)
@@ -78,7 +78,6 @@ func (s * StartupHandler) GetListStartups(c * fiber.Ctx) error{
 			ID:          startup.ID,
 		Name:        startup.Name,
 		Description: startup.Description,
-		CreatorID:   startup.CreatorID,
 		TargetAudience: startup.TargetAudience,
 		Solution: startup.Solution,
 		ShortDescription: startup.ShortDescription,
@@ -87,7 +86,7 @@ func (s * StartupHandler) GetListStartups(c * fiber.Ctx) error{
 		Categories:  startup.Categories,
 		Files:       startup.Files,
 		Vacansies:   startup.Vacancies,
-
+		Stage: startup.Stage,
 		})
 	}
 	return c.Status(fiber.StatusOK).JSON(startupResponse)
