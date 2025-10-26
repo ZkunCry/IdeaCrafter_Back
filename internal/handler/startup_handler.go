@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"math"
 	"startup_back/internal/dto"
 	"startup_back/internal/service"
 
@@ -68,7 +69,7 @@ func (s * StartupHandler) GetListStartups(c * fiber.Ctx) error{
 	if err := c.QueryParser(&inputs); err != nil{
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid input"})
 	}
-	startups,err := s.services.Startup.GetAll(c.Context(),inputs.Limit,inputs.Offset)
+	startups,totalCount,err := s.services.Startup.GetAll(c.Context(),inputs.Limit,inputs.Offset)
 	if err != nil{
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -89,5 +90,9 @@ func (s * StartupHandler) GetListStartups(c * fiber.Ctx) error{
 		Stage: startup.Stage,
 		})
 	}
-	return c.Status(fiber.StatusOK).JSON(startupResponse)
+	totalPages := int(math.Ceil(float64(totalCount) / float64(inputs.Limit)))
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"startups": startupResponse,
+		"total_count": totalPages,
+	})
 }

@@ -9,7 +9,7 @@ import (
 type StartupRepository interface {
     Create(ctx context.Context, startup *domain.Startup, categoryIDs []uint) (*domain.Startup, error)
     GetByID(ctx context.Context, id uint) (*domain.Startup, error)
-    GetAll(ctx context.Context, limit, offset int) ([]*domain.Startup, error)
+    GetAll(ctx context.Context, limit, offset int) ([]*domain.Startup, int64, error)
     Delete(ctx context.Context, id uint) error
 }
 type startupRepository struct {
@@ -60,8 +60,13 @@ func (s *startupRepository) GetByID(ctx context.Context, id uint) (*domain.Start
 	}
 	return &startup, nil
 }
-func (s *startupRepository) GetAll(ctx context.Context, limit, offset int) ([]*domain.Startup, error){
+func (s *startupRepository) GetAll(ctx context.Context, limit, offset int) ([]*domain.Startup, int64, error){
 	var startups []*domain.Startup
+	var totalCount int64;
+	if err := s.db.WithContext(ctx).Model(&domain.Startup{}).Count(&totalCount).Error; err != nil {
+		return nil,0,err
+	}	
+	sqlOffset := offset * limit
 	query := s.db.WithContext(ctx).
 	Preload("Creator").
 	Preload("Categories").
@@ -69,13 +74,13 @@ func (s *startupRepository) GetAll(ctx context.Context, limit, offset int) ([]*d
 	Preload("Files").
 	Preload("Stage").
 	Limit(limit).
-	Offset(offset)
+	Offset(sqlOffset)
 
 
 	if err := query.Find(&startups).Error; err != nil {
-		return nil, err
+		return nil,0, err
 	}
-	return startups, nil
+	return startups, totalCount, nil
 }
 func (s *startupRepository)  Delete(ctx context.Context, id uint) error {
 	return s.db.WithContext(ctx).Delete(&domain.Startup{},id).Error
