@@ -85,7 +85,7 @@ func main() {
 	})
 	app.Use(func(c *fiber.Ctx) error {
 		start := time.Now()
-		err := c.Next() // Продолжаем обработку запроса
+		err := c.Next() 
 		duration := time.Since(start)
 
 		entry := logrus.WithFields(logrus.Fields{

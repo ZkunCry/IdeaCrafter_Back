@@ -30,9 +30,9 @@ type StartupResponse struct {
 	TargetAudience   string                 `json:"target_audience"`
 	Problem          string                 `json:"problem"`
 	Solution         string                 `json:"solution"`
-	Stage            domain.Stage           `json:"stage"`
-	Creator          domain.User            `json:"creator"`
+	Stage            StageResponse           `json:"stage"`
+	Creator          UserResponse           `json:"creator"`
 	Categories       []domain.Category      `json:"categories"`
 	Files            []domain.StartupFile   `json:"files"`
-	Vacansies []domain.Vacancy `json:"vacancies"`
+	Vacansies 			[]domain.Vacancy `json:"vacancies"`
 }

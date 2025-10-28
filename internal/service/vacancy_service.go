@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"startup_back/internal/domain"
 	"startup_back/internal/dto"
 	"startup_back/internal/repository"
@@ -24,7 +25,6 @@ func NewVacancyService(repo  repository.VacancyRepository) VacancyService{
 }
 
 func (v *vacancyService) Create(ctx context.Context, input *dto.CreateVacancyInput) (*domain.Vacancy, error){
-	// валидация
     if input.StartupID == 0 || input.RoleID == 0 {
         return nil, errors.New("startup_id and role_id are required")
     }
@@ -35,8 +35,13 @@ func (v *vacancyService) Create(ctx context.Context, input *dto.CreateVacancyInp
         IsOpen:      true,
     }
 
- 
-    return v.repo.Create(ctx, vacancy)
+		created, err := v.repo.Create(ctx, vacancy)
+		if err != nil {
+			fmt.Print("ERROR NOT NIL")
+				return nil, err
+		}	
+		fmt.Print(created)
+    return created,nil
 }
 
 func (v *vacancyService) GetByID(ctx context.Context, id uint) (*domain.Vacancy, error){

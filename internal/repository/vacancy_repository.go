@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"startup_back/internal/domain"
 
 	"gorm.io/gorm"
@@ -24,19 +25,22 @@ func NewVacancyRepository(db *gorm.DB) VacancyRepository {
 
 func (v *vacancyRepository) Create(ctx context.Context, vacancy *domain.Vacancy) (*domain.Vacancy, error) {
 	if err := v.db.WithContext(ctx).Create(vacancy).Error; err != nil {
+
 		return nil, err
 	}
+
 	if err := v.db.WithContext(ctx).
         Preload("Role").
         First(vacancy, vacancy.ID).Error; err != nil {
         return nil, err
     }
+	
 	return vacancy, nil
 }
 
 func (v *vacancyRepository) GetByID(ctx context.Context, id uint) (*domain.Vacancy, error) {
 	var vacancy domain.Vacancy
-	if err := v.db.WithContext(ctx).First(&vacancy, id).Error; err != nil {
+	if err := v.db.WithContext(ctx).Preload("Role").First(&vacancy, id).Error; err != nil {
 		return nil, err
 	}
 	return &vacancy, nil
@@ -57,15 +61,17 @@ func (v *vacancyRepository) Update(ctx context.Context, id uint, vacancy *domain
 }
 
 func (v *vacancyRepository) Delete(ctx context.Context, id uint) error {
-	if err := v.db.WithContext(ctx).Delete(&domain.Vacancy{}, id).Error; err != nil {
-		return err
-	}
+	res := v.db.WithContext(ctx).Delete(&domain.Vacancy{}, id)
+	fmt.Printf("res %d", res.RowsAffected)
+	if res.Error != nil {
+    return res.Error
+}
 	return nil
 }
  
 func (v *vacancyRepository) GetByStartupID(ctx context.Context, startupID uint) ([] *domain.Vacancy, error) {
 	var vacancies []*domain.Vacancy
-	if err := v.db.WithContext(ctx).Where("startup_id = ?", startupID).Find(&vacancies).Error; err != nil {
+	if err := v.db.WithContext(ctx).Preload("Role").Where("startup_id = ?", startupID).Find(&vacancies).Error; err != nil {
 		return nil, err
 	}
 	return vacancies, nil
@@ -73,7 +79,7 @@ func (v *vacancyRepository) GetByStartupID(ctx context.Context, startupID uint) 
 
 func (v *vacancyRepository) GetAll(ctx context.Context) ([] *domain.Vacancy, error) {
 	var vacancies []*domain.Vacancy
-	if err := v.db.WithContext(ctx).Find(&vacancies).Error; err != nil {
+	if err := v.db.WithContext(ctx).Preload("Role").Find(&vacancies).Error; err != nil {
 		return nil, err
 	}
 	return vacancies, nil

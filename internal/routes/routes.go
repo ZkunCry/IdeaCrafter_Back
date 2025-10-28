@@ -36,9 +36,11 @@ func SetupRoutes ( app *fiber.App ,handlers *handler.Handlers,services *service.
 
 	vacancy := api.Group("/vacancy")
 	vacancy.Post("/", middleware.RequireAuth(services.Token), handlers.Vacancy.CreateVacancy)
-	vacancy.Get("/:id", middleware.RequireAuth(services.Token), handlers.Vacancy.GetVacancyByID)
-	vacancy.Get("/startup/:id", middleware.RequireAuth(services.Token), handlers.Vacancy.GetVacanciesByStartup)
+	vacancy.Get("/:id",  handlers.Vacancy.GetVacancyByID)
+	vacancy.Get("/startup/:id",  handlers.Vacancy.GetVacanciesByStartup)
 	vacancy.Put("/:id", middleware.RequireAuth(services.Token), handlers.Vacancy.UpdateVacancy)
+	vacancy.Delete("/:id", middleware.RequireAuth(services.Token), handlers.Vacancy.DeleteVacancy)
+
 
 	role := api.Group("/role")
 	role.Post("/", middleware.RequireAuth(services.Token), handlers.Role.CreateRole)
@@ -46,11 +48,11 @@ func SetupRoutes ( app *fiber.App ,handlers *handler.Handlers,services *service.
 	application := api.Group("/application")
 	application.Post("/", middleware.RequireAuth(services.Token), handlers.Application.CreateApplication)
 	// application.Get("/vacancy/:id", middleware.RequireAuth(services.Token), handlers.Application.)
-	application.Get("/:id", middleware.RequireAuth(services.Token), handlers.Application.GetApplicationByID)
+	application.Get("/:id", handlers.Application.GetApplicationByID)
 	application.Put("/:id", middleware.RequireAuth(services.Token), handlers.Application.UpdateApplication)
 	application.Put("/statuc/:id", middleware.RequireAuth(services.Token), handlers.Application.UpdateApplicationStatus) 
 
 	stage := api.Group("/stage")
 	stage.Post("/", middleware.RequireAuth(services.Token), handlers.Stage.CreateStage)
-	stage.Get("/", middleware.RequireAuth(services.Token), handlers.Stage.GetList)
+	stage.Get("/", handlers.Stage.GetList)
 }

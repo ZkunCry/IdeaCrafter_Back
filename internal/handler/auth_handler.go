@@ -19,16 +19,16 @@ type UserResponse struct {
 func NewAuthHandler(service *service.Services) * AuthHandler{
 	return &AuthHandler{service: service}
 }
-// Signup user
-// @Summary Register a new user
-// @Description Создает нового пользователя
-// @Tags auth
-// @Accept json
-// @Produce json
-// @Param user body domain.User true "User info"
-// @Success 201 {object} domain.User
-// @Failure 400 {object} map[string]string
-// @Router /api/auth/signup [post]
+// SignUp godoc
+// @Summary      Регистрация нового пользователя
+// @Description  Создаёт нового пользователя и выдаёт access/refresh токены в cookie
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        user  body      dto.CreateUserInput  true  "Информация о пользователе"
+// @Success      201   {object}  UserResponse
+// @Failure      400   {object}  map[string]string
+// @Router       /auth/signup [post]
 func (h *AuthHandler) SignUp(c *fiber.Ctx) error {
  
   var input dto.CreateUserInput
@@ -66,7 +66,16 @@ func (h *AuthHandler) SignUp(c *fiber.Ctx) error {
    return c.Status(fiber.StatusCreated).JSON(response)
 
 }
-
+// SignIn godoc
+// @Summary      Авторизация пользователя
+// @Description  Выполняет вход по email и паролю, устанавливает токены в cookie
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        credentials  body      dto.CreateUserInput  true  "Данные для входа"
+// @Success      200  {object}  UserResponse
+// @Failure      400  {object}  map[string]string
+// @Router       /auth/signin [post]
 func (h *AuthHandler) SignIn(c *fiber.Ctx) error {
   var input dto.CreateUserInput
   if err := c.BodyParser(&input); err != nil {
@@ -101,7 +110,14 @@ func (h *AuthHandler) SignIn(c *fiber.Ctx) error {
   }
    return c.Status(fiber.StatusOK).JSON(response)
 }
-
+// IdentityMe godoc
+// @Summary      Проверка авторизованного пользователя
+// @Description  Возвращает информацию о текущем пользователе по access_token из cookie
+// @Tags         auth
+// @Produce      json
+// @Success      200  {object}  UserResponse
+// @Failure      401  {object}  map[string]string
+// @Router       /auth/me [get]
 func (h * AuthHandler) IdentityMe(c *fiber.Ctx) error {
   user, err := h.service.Auth.IdentityMe(c.Context(), c.Cookies("access_token"))
   fmt.Println(user)
@@ -115,7 +131,14 @@ func (h * AuthHandler) IdentityMe(c *fiber.Ctx) error {
   }
   return c.Status(fiber.StatusOK).JSON(response)
 }
-
+// Refresh godoc
+// @Summary      Обновление токена доступа
+// @Description  Обновляет access_token по refresh_token из cookie
+// @Tags         auth
+// @Produce      json
+// @Success      200  {object}  map[string]string
+// @Failure      401  {object}  map[string]string
+// @Router       /auth/refresh [post]
 func (h * AuthHandler) Refresh(c *fiber.Ctx) error {
   accessToken, err := h.service.Auth.RefreshToken(c.Context(), c.Cookies("refresh_token"))
   

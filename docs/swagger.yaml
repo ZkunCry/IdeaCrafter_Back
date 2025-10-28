@@ -1,4 +1,142 @@
 basePath: /api
+definitions:
+  dto.CreateApplicationInput:
+    properties:
+      message:
+        type: string
+      user_id:
+        type: integer
+      vacancy_id:
+        type: integer
+    required:
+    - user_id
+    - vacancy_id
+    type: object
+  dto.CreateRoleInput:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  dto.CreateStageInput:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  dto.CreateStartupInput:
+    properties:
+      category_ids:
+        items:
+          type: integer
+        type: array
+      creator_id:
+        type: integer
+      description:
+        type: string
+      name:
+        type: string
+      problem:
+        type: string
+      short_description:
+        type: string
+      solution:
+        type: string
+      stage_id:
+        type: integer
+      target_audience:
+        type: string
+    required:
+    - category_ids
+    - description
+    - name
+    - short_description
+    type: object
+  dto.CreateUserInput:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      username:
+        minLength: 3
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  dto.CreateVacancyInput:
+    properties:
+      description:
+        type: string
+      role_id:
+        type: integer
+      startup_id:
+        type: integer
+    required:
+    - role_id
+    - startup_id
+    type: object
+  dto.RoleResponse:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  dto.StageResponse:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  dto.UpdateApplicationStatusInput:
+    properties:
+      status:
+        enum:
+        - pending
+        - accepted
+        - rejected
+        type: string
+    required:
+    - status
+    type: object
+  dto.UpdateVacancyInput:
+    properties:
+      description:
+        type: string
+      is_open:
+        type: boolean
+    type: object
+  dto.VacancyResponse:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      is_open:
+        type: boolean
+      role:
+        $ref: '#/definitions/dto.RoleResponse'
+      role_name:
+        type: string
+      startup_id:
+        type: integer
+    type: object
+  handler.UserResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      username:
+        type: string
+    type: object
 host: localhost:3001
 info:
   contact:
@@ -12,5 +150,543 @@ info:
   termsOfService: http://example.com/terms/
   title: Startup API
   version: "1.0"
-paths: {}
+paths:
+  /application:
+    post:
+      consumes:
+      - application/json
+      description: Создает новую заявку на вакансию
+      parameters:
+      - description: Application info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateApplicationInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.CreateApplicationInput'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new application
+      tags:
+      - applications
+  /application/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Получает заявку по ID
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.CreateApplicationInput'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get application by ID
+      tags:
+      - applications
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные заявки (например, сообщение)
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated application info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateApplicationInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.CreateApplicationInput'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update an application
+      tags:
+      - applications
+  /applications/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: 'Изменяет статус заявки: pending, accepted, rejected'
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New status
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateApplicationStatusInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UpdateApplicationStatusInput'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update application status
+      tags:
+      - applications
+  /auth/me:
+    get:
+      description: Возвращает информацию о текущем пользователе по access_token из
+        cookie
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.UserResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Проверка авторизованного пользователя
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      description: Обновляет access_token по refresh_token из cookie
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновление токена доступа
+      tags:
+      - auth
+  /auth/signin:
+    post:
+      consumes:
+      - application/json
+      description: Выполняет вход по email и паролю, устанавливает токены в cookie
+      parameters:
+      - description: Данные для входа
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateUserInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Авторизация пользователя
+      tags:
+      - auth
+  /auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Создаёт нового пользователя и выдаёт access/refresh токены в cookie
+      parameters:
+      - description: Информация о пользователе
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateUserInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handler.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Регистрация нового пользователя
+      tags:
+      - auth
+  /roles:
+    post:
+      consumes:
+      - application/json
+      description: Добавляет новую роль в систему (например, Admin, User, Moderator)
+      parameters:
+      - description: Данные роли
+        in: body
+        name: role
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateRoleInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.RoleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создание новой роли
+      tags:
+      - roles
+  /stage:
+    get:
+      consumes:
+      - application/json
+      description: Ищет список этапов (например, MVP, Идея)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.StageResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получение списка этапов
+      tags:
+      - stages
+    post:
+      consumes:
+      - application/json
+      description: Создает новый этап стартапа (например, MVP, Идея)
+      parameters:
+      - description: Данные нового этапа
+        in: body
+        name: stage
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateStageInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.StageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создание этапа
+      tags:
+      - stages
+  /startups:
+    get:
+      consumes:
+      - application/json
+      description: Получение стартапа по offset и limit
+      parameters:
+      - description: Данные стартапа
+        in: body
+        name: startup
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateStartupInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Получить стартап
+      tags:
+      - startups
+    post:
+      consumes:
+      - application/json
+      description: Создает новый стартап от имени авторизованного пользователя
+      parameters:
+      - description: Данные стартапа
+        in: body
+        name: startup
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateStartupInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Создать стартап
+      tags:
+      - startups
+  /vacancy:
+    post:
+      consumes:
+      - application/json
+      description: Создает новую вакансию для стартапа
+      parameters:
+      - description: Данные вакансии
+        in: body
+        name: vacancy
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateVacancyInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.VacancyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Создать вакансию
+      tags:
+      - vacancies
+  /vacancy/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет вакансию по заданному id
+      parameters:
+      - description: ID вакансии
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Пример ответа"  example({"message":"vacancy deleted"})
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Удалить вакансию
+      tags:
+      - vacancies
+    get:
+      description: Возвращает вакансию по её идентификатору
+      parameters:
+      - description: ID вакансии
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.VacancyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить вакансию по ID
+      tags:
+      - vacancies
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные существующей вакансии по ID
+      parameters:
+      - description: ID вакансии
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: vacancy
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateVacancyInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.VacancyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Обновить вакансию
+      tags:
+      - vacancies
+  /vacancy/startup/:startupID:
+    get:
+      description: Возвращает список вакансий, связанных с конкретным стартапом
+      parameters:
+      - description: ID стартапа
+        in: path
+        name: startupID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.VacancyResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить вакансии стартапа
+      tags:
+      - vacancies
 swagger: "2.0"

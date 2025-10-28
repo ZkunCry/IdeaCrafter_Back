@@ -14,7 +14,16 @@ func NewRoleHandler(services *service.Services) *RoleHandler {
 	return &RoleHandler{services: services}
 }
 
-
+// CreateRole godoc
+// @Summary      Создание новой роли
+// @Description  Добавляет новую роль в систему (например, Admin, User, Moderator)
+// @Tags         roles
+// @Accept       json
+// @Produce      json
+// @Param        role  body      dto.CreateRoleInput  true  "Данные роли"
+// @Success      200   {object}  dto.RoleResponse
+// @Failure      400   {object}  map[string]string
+// @Router       /roles [post]
 func (r *RoleHandler) CreateRole(c *fiber.Ctx) error {
 	var inputs dto.CreateRoleInput
 

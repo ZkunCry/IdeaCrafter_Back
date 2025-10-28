@@ -1,8 +1,4 @@
 package dto
-
-import (
-	"startup_back/internal/domain"
-)
 type CreateVacancyInput struct {
 	StartupID   uint   `json:"startup_id" validate:"required"`
 	RoleID      uint   `json:"role_id" validate:"required"`
@@ -17,7 +13,7 @@ type UpdateVacancyInput struct {
 type VacancyResponse struct {
 	ID          uint   `json:"id"`
 	StartupID   uint   `json:"startup_id"`
-	Role        domain.Role   `json:"role"`
+	Role        RoleResponse   `json:"role"`
 	RoleName    string `json:"role_name,omitempty"`
 	Description string `json:"description"`
 	IsOpen      bool   `json:"is_open"`
