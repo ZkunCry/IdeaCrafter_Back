@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"startup_back/internal/domain"
 
 	"gorm.io/gorm"
@@ -9,7 +10,7 @@ import (
 type StartupRepository interface {
     Create(ctx context.Context, startup *domain.Startup, categoryIDs []uint) (*domain.Startup, error)
     GetByID(ctx context.Context, id uint) (*domain.Startup, error)
-    GetAll(ctx context.Context, limit, offset int) ([]*domain.Startup, int64, error)
+    GetAll(ctx context.Context,searchString string,	 limit, offset int) ([]*domain.Startup, int64, error)
     Delete(ctx context.Context, id uint) error
 }
 type startupRepository struct {
@@ -60,26 +61,34 @@ func (s *startupRepository) GetByID(ctx context.Context, id uint) (*domain.Start
 	}
 	return &startup, nil
 }
-func (s *startupRepository) GetAll(ctx context.Context, limit, offset int) ([]*domain.Startup, int64, error){
+func (s *startupRepository) GetAll(ctx context.Context,searchString string, limit, offset int) ([]*domain.Startup, int64, error){
 	var startups []*domain.Startup
 	var totalCount int64;
-	if err := s.db.WithContext(ctx).Model(&domain.Startup{}).Count(&totalCount).Error; err != nil {
-		return nil,0,err
-	}	
-	sqlOffset := offset * limit
-	query := s.db.WithContext(ctx).
-	Preload("Creator").
-	Preload("Categories").
-	Preload("Vacancies").
-	Preload("Files").
-	Preload("Stage").
-	Limit(limit).
-	Offset(sqlOffset)
+	query := s.db.WithContext(ctx).Model(&domain.Startup{})
+	fmt.Printf("SEARCH STRING %v",searchString)
+	if searchString != ""{
+		fmt.Println("TWESTSD")
+		searchPattern := "%" + searchString + "%"
+		query = query.Where("LOWER(name) LIKE LOWER(?) OR LOWER(description) LIKE LOWER(?)", searchPattern, searchPattern)
 
-
-	if err := query.Find(&startups).Error; err != nil {
-		return nil,0, err
 	}
+	if err := query.Count(&totalCount).Error; err !=nil{
+		return nil,0,err	
+	}
+	sqlOffset := offset * limit
+	if err := query.
+		Preload("Creator").
+		Preload("Categories").
+		Preload("Vacancies").
+		Preload("Files").
+		Preload("Stage").
+		Order("created_at DESC").
+		Limit(limit).
+		Offset(sqlOffset).
+		Find(&startups).Error; err != nil {
+		return nil, 0, err
+	}
+
 	return startups, totalCount, nil
 }
 func (s *startupRepository)  Delete(ctx context.Context, id uint) error {

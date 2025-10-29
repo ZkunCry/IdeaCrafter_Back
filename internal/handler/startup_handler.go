@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"math"
 	"startup_back/internal/dto"
 	"startup_back/internal/service"
@@ -88,7 +89,8 @@ func (s * StartupHandler) GetListStartups(c * fiber.Ctx) error{
 	if err := c.QueryParser(&inputs); err != nil{
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid input"})
 	}
-	startups,totalCount,err := s.services.Startup.GetAll(c.Context(),inputs.Limit,inputs.Offset)
+	fmt.Println(inputs.SearchString)
+	startups,totalCount,err := s.services.Startup.GetAll(c.Context(), inputs.SearchString,inputs.Limit,inputs.Offset)
 	if err != nil{
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
