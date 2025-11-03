@@ -5,6 +5,7 @@ import (
 	"math"
 	"startup_back/internal/dto"
 	"startup_back/internal/service"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -45,7 +46,7 @@ func (s *StartupHandler) CreateStartup(c *fiber.Ctx) error {
 		})
 	}
 	input.CreatorID = userID
-	startup, err := s.services.Startup.Create(c.Context(), &input)
+	startup, err := s.services.Startup.Create(c.Context(), input)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": err.Error(),
@@ -116,7 +117,19 @@ func (s * StartupHandler) GetListStartups(c * fiber.Ctx) error{
 	}
 	totalPages := int(math.Ceil(float64(totalCount) / float64(inputs.Limit)))
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"startups": startupResponse,
+		"items": startupResponse,
 		"total_count": totalPages,
 	})
+}
+
+func (s * StartupHandler) GetStartupByID(c * fiber.Ctx) error{
+	id, err := strconv.ParseUint(c.Params("id"),10,64)
+	if err != nil{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid id"})
+	}
+	startup,err := s.services.Startup.GetByID(c.Context(), uint(id))
+	if err != nil{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.Status(fiber.StatusOK).JSON(startup)
 }

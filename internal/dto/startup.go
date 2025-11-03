@@ -17,9 +17,9 @@ type CreateStartupInput struct {
 
 
 type GetStartupList struct {
-	Limit  int `json:"limit"`
-	Offset int `json:"offset"`
-	SearchString string `json:"search_string"`
+	Limit  int 
+	Offset int 
+	SearchString string 
 }
 
 

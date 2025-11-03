@@ -156,3 +156,16 @@ func (h * AuthHandler) Refresh(c *fiber.Ctx) error {
   })
   return c.Status(fiber.StatusOK).JSON(fiber.Map{"access_token": accessToken})
 }
+// Logout godoc
+// @Summary      Выход из аккаунта
+// @Description  Удаляет access_token и refresh_token из cookie
+// @Tags         auth
+// @Produce      json
+// @Success      200  {object}  map[string]string
+// @Failure      401  {object}  map[string]string
+// @Router       /auth/logout [post]
+func (h * AuthHandler) LogOut(c *fiber.Ctx) error {
+  c.ClearCookie("access_token")
+  c.ClearCookie("refresh_token")
+  return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "success"})
+}

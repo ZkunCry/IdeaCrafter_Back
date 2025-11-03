@@ -10,7 +10,7 @@ import (
 type StartupRepository interface {
     Create(ctx context.Context, startup *domain.Startup, categoryIDs []uint) (*domain.Startup, error)
     GetByID(ctx context.Context, id uint) (*domain.Startup, error)
-    GetAll(ctx context.Context,searchString string,	 limit, offset int) ([]*domain.Startup, int64, error)
+    GetAll(ctx context.Context,searchString string,	 limit, offset int) ([]*domain.Startup, int, error)
     Delete(ctx context.Context, id uint) error
 }
 type startupRepository struct {
@@ -55,13 +55,13 @@ func (s *startupRepository) Create(ctx context.Context, startup *domain.Startup,
 
 func (s *startupRepository) GetByID(ctx context.Context, id uint) (*domain.Startup, error){
 	var startup domain.Startup
-	err := s.db.Where("id = ?", id).First(&startup).Error
+	err := s.db.Where("id = ?", id).Preload("Categories").Preload("Creator").Preload("Stage").Preload("Files").Preload("Vacancies").First(&startup).Error
 	if err !=nil{
 		return nil,err
 	}
 	return &startup, nil
 }
-func (s *startupRepository) GetAll(ctx context.Context,searchString string, limit, offset int) ([]*domain.Startup, int64, error){
+func (s *startupRepository) GetAll(ctx context.Context,searchString string, limit, offset int) ([]*domain.Startup, int, error){
 	var startups []*domain.Startup
 	var totalCount int64;
 	query := s.db.WithContext(ctx).Model(&domain.Startup{})
@@ -89,7 +89,7 @@ func (s *startupRepository) GetAll(ctx context.Context,searchString string, limi
 		return nil, 0, err
 	}
 
-	return startups, totalCount, nil
+	return startups, int(totalCount), nil
 }
 func (s *startupRepository)  Delete(ctx context.Context, id uint) error {
 	return s.db.WithContext(ctx).Delete(&domain.Startup{},id).Error

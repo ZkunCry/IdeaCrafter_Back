@@ -11,6 +11,7 @@ type Repositories struct {
 		Role          RoleRepository
 		Application   ApplicationRepository
 		Stage 				StageRepository
+		Category 			CategoryRepository
 }
 
 func NewRespositories(db *gorm.DB) * Repositories{
@@ -21,5 +22,6 @@ func NewRespositories(db *gorm.DB) * Repositories{
 		Role: NewRoleRepository(db),
 		Application: NewApplicationRepository(db),
 		Stage: NewStageRepository(db),
+		Category: NewCategoryRepository(db),
 	}
 }

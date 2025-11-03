@@ -21,6 +21,7 @@ type Services struct {
 		Role RoleService
 		Application ApplicationService
 		Stage StageService
+		Category CategoryService
 
 }
 
@@ -35,5 +36,6 @@ func NewServices(repos *repository.Repositories,cfg *config.Config) *Services{
 		Role: NewRoleService(repos.Role),	
 		Application: NewApplicationService(repos.Application),
 		Stage: NewStageService(repos.Stage),
+		Category: NewCategoryService(repos.Category),
 	}
 }

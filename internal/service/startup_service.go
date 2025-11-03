@@ -9,9 +9,9 @@ import (
 	"context"
 )
 type StartupService interface {
-	Create(ctx context.Context, input *dto.CreateStartupInput) (*domain.Startup, error)
+	Create(ctx context.Context, input dto.CreateStartupInput) (*domain.Startup, error)
   GetByID(ctx context.Context, id uint) (*domain.Startup, error)
-  GetAll(ctx context.Context, searchString string,  limit, offset int) ([]*domain.Startup, int64, error)
+  GetAll(ctx context.Context, searchString string,  limit, offset int) ([]*domain.Startup, int, error)
   Delete(ctx context.Context, id uint) error	
 }
 type startupService struct{
@@ -22,11 +22,7 @@ type startupService struct{
 func NewStartupService(repo repository.StartupRepository) StartupService{
 	return &startupService{repo:repo}
 }
-func (s *startupService) Create(ctx context.Context, input *dto.CreateStartupInput) (*domain.Startup, error) {
-	if input == nil {
-		return nil, fmt.Errorf("input is nil")
-	}
-
+func (s *startupService) Create(ctx context.Context, input dto.CreateStartupInput) (*domain.Startup, error) {
 	startup := &domain.Startup{
 		Name:             input.Name,
 		Description:      input.Description,
@@ -54,7 +50,7 @@ func (s * startupService) GetByID(ctx context.Context, id uint) (*domain.Startup
 	return startup,nil
 }
 
-func (s * startupService) GetAll(ctx context.Context, searchString string, limit, offset int) ([]*domain.Startup,int64, error) {
+func (s * startupService) GetAll(ctx context.Context, searchString string, limit, offset int) ([]*domain.Startup,int, error) {
 	startups,totalCount, err := s.repo.GetAll(ctx, searchString,limit,offset)
 	if err !=nil{
 		return nil,0,err
