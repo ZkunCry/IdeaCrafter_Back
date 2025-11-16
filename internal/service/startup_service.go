@@ -32,6 +32,7 @@ func (s *startupService) Create(ctx context.Context, input dto.CreateStartupInpu
 		Solution:         input.Solution,
 		CreatorID:        input.CreatorID,
 		StageID:          input.StageID,
+		LogoURL:  input.LogoFile,
 	}
 
 	created, err := s.repo.Create(ctx, startup, input.CategoryIDs)

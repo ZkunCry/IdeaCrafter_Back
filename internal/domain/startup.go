@@ -10,7 +10,7 @@ type Startup struct {
     TargetAudience   string        `gorm:"type:text" json:"target_audience"`
     Problem          string        `gorm:"type:text" json:"problem"`
 	Solution         string        `gorm:"type:text" json:"solution"`
-
+    LogoURL          string        `gorm:"column:logo_url"`
     StageID          uint           `json:"stage_id"`                    
 	Stage            Stage          `gorm:"foreignKey:StageID" json:"stage"`
     CreatorID   uint                `gorm:"not null" json:"creator_id"`
@@ -20,4 +20,3 @@ type Startup struct {
     Vacancies []Vacancy             `gorm:"foreignKey:StartupID;constraint:OnDelete:CASCADE;" json:"vacancies"`
 
 }
-

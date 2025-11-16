@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"startup_back/internal/config"
 	"startup_back/internal/domain"
@@ -10,6 +11,8 @@ import (
 	"startup_back/internal/service"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/sirupsen/logrus"
 
 	_ "startup_back/docs"
@@ -38,12 +41,22 @@ import (
 
 func main() {
 	cfg, err := config.LoadConfig()
+
 	logrus.SetFormatter(&logrus.JSONFormatter{})
 	if err != nil {
 		logrus.Fatalf("error loading config: %v", err)
 	}
-	logrus.Infof("Loaded config: %+v", cfg)
-	
+
+			result, err := cfg.S3Client.ListObjectsV2(context.TODO(), &s3.ListObjectsV2Input{
+				Bucket: aws.String("idea-crafter"), 
+		})
+		if err != nil {
+				logrus.Fatal(err)
+		}
+
+		for _, obj := range result.Contents {
+				logrus.Printf("Object: %s, size: %d", aws.ToString(obj.Key), obj.Size)
+		}
 	db, err := gorm.Open(postgres.Open(cfg.DBConnectionString()),&gorm.Config{})
 
 	if err !=nil{
@@ -66,8 +79,7 @@ func main() {
 		logrus.Fatalf("Failed to migrate database: %v", err)
 	}
 	repos:= repository.NewRespositories(db)
-	services:= service.NewServices(repos,&cfg)
-
+	services:= service.NewServices(repos,cfg)
 	handlers:=handler.NewHandlers(services)
 
 	app:= fiber.New(fiber.Config{

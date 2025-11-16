@@ -1,6 +1,8 @@
 package dto
 
-import "startup_back/internal/domain"
+import (
+	"startup_back/internal/domain"
+)
 
 
 type CreateStartupInput struct {
@@ -13,7 +15,8 @@ type CreateStartupInput struct {
 	Solution         string `json:"solution"`                              
 	StageID          uint   `json:"stage_id"`                              
 	CategoryIDs      []uint `json:"category_ids" validate:"required"`     
-}
+	LogoFile 				 string	`json:"-"`
+}	
 
 
 type GetStartupList struct {
@@ -36,4 +39,5 @@ type StartupResponse struct {
 	Categories       []domain.Category      `json:"categories"`
 	Files            []domain.StartupFile   `json:"files"`
 	Vacansies 			[]domain.Vacancy `json:"vacancies"`
+	LogoUrl          string                 `json:"logo_url"`
 }

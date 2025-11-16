@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"startup_back/internal/service"
 
 	"github.com/gofiber/fiber/v2"
@@ -27,6 +28,10 @@ func NewApplicationHandler(services *service.Services) *ApplicationHandler {
 // @Failure 400 {object} map[string]string
 // @Router /application [post]
 func (r *ApplicationHandler) CreateApplication(c *fiber.Ctx) error {
+
+	formData := c.FormValue("test")
+	fmt.Println(formData)
+
 	return nil
 }
 // UpdateApplication

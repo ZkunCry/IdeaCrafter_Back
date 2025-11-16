@@ -4,6 +4,8 @@ import (
 	"startup_back/internal/config"
 	"startup_back/internal/domain"
 	"startup_back/internal/repository"
+
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 type AuthResponse struct {
 	User *domain.User
@@ -22,10 +24,11 @@ type Services struct {
 		Application ApplicationService
 		Stage StageService
 		Category CategoryService
+		S3  *s3.Client
 
 }
 
-func NewServices(repos *repository.Repositories,cfg *config.Config) *Services{
+func NewServices(repos *repository.Repositories,cfg *config.AppConfig) *Services{
 	return &Services{
 		User: NewUserService(repos.User),
 		Password: NewPasswordService(),
@@ -37,5 +40,6 @@ func NewServices(repos *repository.Repositories,cfg *config.Config) *Services{
 		Application: NewApplicationService(repos.Application),
 		Stage: NewStageService(repos.Stage),
 		Category: NewCategoryService(repos.Category),
+		S3: cfg.S3Client,
 	}
 }

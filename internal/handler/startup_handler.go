@@ -1,13 +1,21 @@
 package handler
 
 import (
+	"bytes"
+	"context"
 	"fmt"
+	"io"
 	"math"
+	"path/filepath"
 	"startup_back/internal/dto"
 	"startup_back/internal/service"
 	"strconv"
+	"strings"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 type StartupHandler struct {
@@ -32,13 +40,36 @@ func NewStartupHandler(services *service.Services) *StartupHandler {
 func (s *StartupHandler) CreateStartup(c *fiber.Ctx) error {
 	var input dto.CreateStartupInput
 
-	if err := c.BodyParser(&input); err != nil {
+	input.Name = c.FormValue("name")
+  input.ShortDescription = c.FormValue("short_description")
+  input.Description = c.FormValue("description")
+  input.TargetAudience = c.FormValue("target_audience")
+  input.Problem = c.FormValue("problem")
+  input.Solution = c.FormValue("solution")
+	stageID,err := strconv.ParseInt(c.FormValue("stage_id"),10,64) 
+	fmt.Println(stageID)
+	input.StageID = uint(stageID)
+	if err != nil{
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "invalid input format",
+			"error": "invalid input stage",
+			"type" : err.Error(),	
 		})
 	}
-
-
+	categoryIDs := strings.Split(c.FormValue("category_ids"), ",")
+	
+	
+	if len(categoryIDs) >1 {
+		for _, categoryID := range categoryIDs {
+			id, err := strconv.ParseUint(categoryID, 10, 64)
+			if err != nil {
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+					"error": "invalid input",
+				})
+			}
+			input.CategoryIDs = append(input.CategoryIDs, uint(id))
+		}
+	}
+	
 	userID, ok := c.Locals("user_id").(uint)
 	if !ok {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
@@ -46,6 +77,43 @@ func (s *StartupHandler) CreateStartup(c *fiber.Ctx) error {
 		})
 	}
 	input.CreatorID = userID
+	file,_ := c.FormFile("files")
+	fmt.Println(file)
+	if file != nil{
+		f,err := file.Open()
+		if err != nil{
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "cannot open file",
+			})
+
+		}
+		defer f.Close()
+		fileBytes, err := io.ReadAll(f)
+    if err != nil {
+        return fiber.NewError(fiber.StatusInternalServerError, "cannot read file")
+    }
+		objectName := "photos/" + uuid.New().String() + filepath.Ext(file.Filename)
+		_, err = s.services.S3.PutObject(
+        context.Background(),
+        &s3.PutObjectInput{
+            Bucket:      aws.String("idea-crafter"),
+            Key:         aws.String(objectName),
+            Body:        bytes.NewReader(fileBytes),
+            ContentType: aws.String(file.Header.Get("Content-Type")),
+        },
+    )
+		if err != nil {
+        return fiber.NewError(fiber.StatusInternalServerError, "cannot upload file to S3: "+err.Error())
+    }
+
+		input.LogoFile = fmt.Sprintf(
+        "https://storage.yandexcloud.net/%s/%s",
+        "idea-crafter",
+        objectName,
+    )
+		fmt.Printf("LOGO URL: %s",input.LogoFile)
+	}
+	
 	startup, err := s.services.Startup.Create(c.Context(), input)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -68,6 +136,8 @@ func (s *StartupHandler) CreateStartup(c *fiber.Ctx) error {
 			ID:   startup.StageID,
 			Name: startup.Stage.Name,
 		},
+		LogoUrl: startup.LogoURL,
+		
 	}
 
 	return c.Status(fiber.StatusOK).JSON(response)
@@ -113,6 +183,7 @@ func (s * StartupHandler) GetListStartups(c * fiber.Ctx) error{
 			ID:   startup.StageID,
 			Name: startup.Stage.Name,
 		},
+		LogoUrl: startup.LogoURL,
 		})
 	}
 	totalPages := int(math.Ceil(float64(totalCount) / float64(inputs.Limit)))
