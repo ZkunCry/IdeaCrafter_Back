@@ -56,8 +56,6 @@ func (s *StartupHandler) CreateStartup(c *fiber.Ctx) error {
 		})
 	}
 	categoryIDs := strings.Split(c.FormValue("category_ids"), ",")
-	
-	
 	if len(categoryIDs) >1 {
 		for _, categoryID := range categoryIDs {
 			id, err := strconv.ParseUint(categoryID, 10, 64)
@@ -69,7 +67,7 @@ func (s *StartupHandler) CreateStartup(c *fiber.Ctx) error {
 			input.CategoryIDs = append(input.CategoryIDs, uint(id))
 		}
 	}
-	
+	fmt.Println(len(input.CategoryIDs))
 	userID, ok := c.Locals("user_id").(uint)
 	if !ok {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
@@ -78,7 +76,7 @@ func (s *StartupHandler) CreateStartup(c *fiber.Ctx) error {
 	}
 	input.CreatorID = userID
 	file,_ := c.FormFile("files")
-	fmt.Println(file)
+
 	if file != nil{
 		f,err := file.Open()
 		if err != nil{
@@ -120,6 +118,7 @@ func (s *StartupHandler) CreateStartup(c *fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
+
 	response := dto.StartupResponse{
 		ID:          startup.ID,
 		Name:        startup.Name,
@@ -196,6 +195,7 @@ func (s * StartupHandler) GetListStartups(c * fiber.Ctx) error{
 func (s * StartupHandler) GetStartupByID(c * fiber.Ctx) error{
 	id, err := strconv.ParseUint(c.Params("id"),10,64)
 	if err != nil{
+		
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid id"})
 	}
 	startup,err := s.services.Startup.GetByID(c.Context(), uint(id))
@@ -203,4 +203,42 @@ func (s * StartupHandler) GetStartupByID(c * fiber.Ctx) error{
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.Status(fiber.StatusOK).JSON(startup)
+}
+
+func (s * StartupHandler) GetUserStartups(c * fiber.Ctx) error{
+	fmt.Println("We are here")
+	userID, ok := c.Locals("user_id").(uint)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "unauthorized",
+		})
+	}
+	startups,err := s.services.Startup.GetUserStartups(c.Context(),userID)
+	if err != nil{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+startupResponse:=[]dto.StartupResponse{}
+	for _,startup := range startups{
+		startupResponse = append(startupResponse, dto.StartupResponse{
+			ID:          startup.ID,
+		Name:        startup.Name,
+		Description: startup.Description,
+		TargetAudience: startup.TargetAudience,
+		Solution: startup.Solution,
+		ShortDescription: startup.ShortDescription,
+		Creator:     dto.UserResponse{ID: startup.CreatorID, Username: startup.Creator.Username, Email: startup.Creator.Email},
+		Problem: startup.Problem,
+		Categories:  startup.Categories,
+		Files:       startup.Files,
+		Vacansies:   startup.Vacancies,
+		Stage: dto.StageResponse{
+			ID:   startup.StageID,
+			Name: startup.Stage.Name,
+		},
+		LogoUrl: startup.LogoURL,
+		})
+	}
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"items": startupResponse,
+	})
 }

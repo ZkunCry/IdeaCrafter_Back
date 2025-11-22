@@ -7,14 +7,30 @@ import (
 
 	"gorm.io/gorm"
 )
+
 type StartupRepository interface {
-    Create(ctx context.Context, startup *domain.Startup, categoryIDs []uint) (*domain.Startup, error)
-    GetByID(ctx context.Context, id uint) (*domain.Startup, error)
-    GetAll(ctx context.Context,searchString string,	 limit, offset int) ([]*domain.Startup, int, error)
-    Delete(ctx context.Context, id uint) error
+	Create(ctx context.Context, startup *domain.Startup, categoryIDs []uint) (*domain.Startup, error)
+	GetByID(ctx context.Context, id uint) (*domain.Startup, error)
+	GetAll(ctx context.Context, searchString string, limit, offset int) ([]*domain.Startup, int, error)
+	Delete(ctx context.Context, id uint) error
+	GetUserStartups(ctx context.Context, userID uint) ([]domain.Startup, error)
 }
 type startupRepository struct {
 	db *gorm.DB
+}
+
+func (s *startupRepository) GetUserStartups(ctx context.Context, userID uint) ([]domain.Startup, error) {
+	var startups [] domain.Startup
+	if err := s.db.WithContext(ctx).
+		Preload("Categories").
+		Preload("Creator").
+		Preload("Stage").
+		Preload("Files").
+		Where("creator_id = ?", userID).
+		Find(&startups).Error; err != nil {
+		return nil, err
+	}
+	return startups, nil
 }
 
 func NewStartupRepository(db *gorm.DB) StartupRepository {
@@ -53,27 +69,27 @@ func (s *startupRepository) Create(ctx context.Context, startup *domain.Startup,
 	return startup, nil
 }
 
-func (s *startupRepository) GetByID(ctx context.Context, id uint) (*domain.Startup, error){
+func (s *startupRepository) GetByID(ctx context.Context, id uint) (*domain.Startup, error) {
 	var startup domain.Startup
 	err := s.db.Where("id = ?", id).Preload("Categories").Preload("Creator").Preload("Stage").Preload("Files").Preload("Vacancies").First(&startup).Error
-	if err !=nil{
-		return nil,err
+	if err != nil {
+		return nil, err
 	}
 	return &startup, nil
 }
-func (s *startupRepository) GetAll(ctx context.Context,searchString string, limit, offset int) ([]*domain.Startup, int, error){
+func (s *startupRepository) GetAll(ctx context.Context, searchString string, limit, offset int) ([]*domain.Startup, int, error) {
 	var startups []*domain.Startup
-	var totalCount int64;
+	var totalCount int64
 	query := s.db.WithContext(ctx).Model(&domain.Startup{})
-	fmt.Printf("SEARCH STRING %v",searchString)
-	if searchString != ""{
+	fmt.Printf("SEARCH STRING %v", searchString)
+	if searchString != "" {
 		fmt.Println("TWESTSD")
 		searchPattern := "%" + searchString + "%"
 		query = query.Where("LOWER(name) LIKE LOWER(?) OR LOWER(description) LIKE LOWER(?)", searchPattern, searchPattern)
 
 	}
-	if err := query.Count(&totalCount).Error; err !=nil{
-		return nil,0,err	
+	if err := query.Count(&totalCount).Error; err != nil {
+		return nil, 0, err
 	}
 	sqlOffset := offset * limit
 	if err := query.
@@ -91,6 +107,6 @@ func (s *startupRepository) GetAll(ctx context.Context,searchString string, limi
 
 	return startups, int(totalCount), nil
 }
-func (s *startupRepository)  Delete(ctx context.Context, id uint) error {
-	return s.db.WithContext(ctx).Delete(&domain.Startup{},id).Error
+func (s *startupRepository) Delete(ctx context.Context, id uint) error {
+	return s.db.WithContext(ctx).Delete(&domain.Startup{}, id).Error
 }

@@ -40,10 +40,8 @@ func (h * CategorynHandler) GetAllCategories(c *fiber.Ctx) error {
 	if err != nil{
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
-	categoriesCopy := make([]dto.Category, len(categories))
-	for i, category := range categories{
-		categoriesCopy[i] = dto.Category{ID: category.ID, Name: category.Name}
-	}
+	var categoriesCopy []dto.Category
+	categoriesCopy = append(categoriesCopy, categories...)
 	totalPages := int(math.Ceil(float64(totalCount) / float64(inputs.Limit)))
 	response := dto.GetListCategoriesResponse{
 		Items: categoriesCopy,
