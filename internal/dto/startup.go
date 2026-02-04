@@ -18,6 +18,10 @@ type CreateStartupInput struct {
 	LogoFile 				 string	`json:"-"`
 }	
 
+type AddStartupCategoriesInput struct {
+	CategoryIDs []uint `json:"category_ids" validate:"required"`
+}
+
 
 type GetStartupList struct {
 	Limit  int 
@@ -40,4 +44,28 @@ type StartupResponse struct {
 	Files            []domain.StartupFile   `json:"files"`
 	Vacansies 			[]domain.Vacancy `json:"vacancies"`
 	LogoUrl          string                 `json:"logo_url"`
+}
+
+func NewStartupResponse(startup *domain.Startup) StartupResponse {
+	if startup == nil {
+		return StartupResponse{}
+	}
+	return StartupResponse{
+		ID:               startup.ID,
+		Name:             startup.Name,
+		Description:      startup.Description,
+		TargetAudience:   startup.TargetAudience,
+		Solution:         startup.Solution,
+		ShortDescription: startup.ShortDescription,
+		Creator:          UserResponse{ID: startup.CreatorID, Username: startup.Creator.Username, Email: startup.Creator.Email},
+		Problem:          startup.Problem,
+		Categories:       startup.Categories,
+		Files:            startup.Files,
+		Vacansies:        startup.Vacancies,
+		Stage: StageResponse{
+			ID:   startup.StageID,
+			Name: startup.Stage.Name,
+		},
+		LogoUrl: startup.LogoURL,
+	}
 }

@@ -14,6 +14,7 @@ type StartupRepository interface {
 	GetAll(ctx context.Context, searchString string, limit, offset int) ([]*domain.Startup, int, error)
 	Delete(ctx context.Context, id uint) error
 	GetUserStartups(ctx context.Context, userID uint) ([]domain.Startup, error)
+	AddCategories(ctx context.Context, startupID uint, categoryIDs []uint) (*domain.Startup, error)
 }
 type startupRepository struct {
 	db *gorm.DB
@@ -109,4 +110,41 @@ func (s *startupRepository) GetAll(ctx context.Context, searchString string, lim
 }
 func (s *startupRepository) Delete(ctx context.Context, id uint) error {
 	return s.db.WithContext(ctx).Delete(&domain.Startup{}, id).Error
+}
+
+func (s *startupRepository) AddCategories(ctx context.Context, startupID uint, categoryIDs []uint) (*domain.Startup, error) {
+	var startup domain.Startup
+	err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.First(&startup, startupID).Error; err != nil {
+			return err
+		}
+		if len(categoryIDs) == 0 {
+			return nil
+		}
+		var categories []domain.Category
+		if err := tx.Where("id IN ?", categoryIDs).Find(&categories).Error; err != nil {
+			return err
+		}
+		if len(categories) == 0 {
+			return fmt.Errorf("categories not found")
+		}
+		if err := tx.Model(&startup).Association("Categories").Append(categories); err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.db.WithContext(ctx).
+		Preload("Categories").
+		Preload("Creator").
+		Preload("Stage").
+		Preload("Files").
+		Preload("Vacancies").
+		First(&startup, startupID).Error; err != nil {
+		return nil, err
+	}
+	return &startup, nil
 }

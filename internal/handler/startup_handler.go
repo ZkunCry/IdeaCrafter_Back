@@ -119,27 +119,7 @@ func (s *StartupHandler) CreateStartup(c *fiber.Ctx) error {
 		})
 	}
 
-	response := dto.StartupResponse{
-		ID:          startup.ID,
-		Name:        startup.Name,
-		Description: startup.Description,
-		TargetAudience: startup.TargetAudience,
-		Solution: startup.Solution,
-		ShortDescription: startup.ShortDescription,
-		Creator:     dto.UserResponse{ID: startup.CreatorID, Username: startup.Creator.Username, Email: startup.Creator.Email}, 
-		Problem: startup.Problem,
-		Categories:  startup.Categories,
-		Files:       startup.Files,
-		Vacansies:   startup.Vacancies,
-		Stage: dto.StageResponse{
-			ID:   startup.StageID,
-			Name: startup.Stage.Name,
-		},
-		LogoUrl: startup.LogoURL,
-		
-	}
-
-	return c.Status(fiber.StatusOK).JSON(response)
+	return c.Status(fiber.StatusOK).JSON(dto.NewStartupResponse(startup))
 }
 
 // CreateStartup godoc
@@ -164,26 +144,9 @@ func (s * StartupHandler) GetListStartups(c * fiber.Ctx) error{
 	if err != nil{
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
-	startupResponse:=[]dto.StartupResponse{}
-	for _,startup := range startups{
-		startupResponse = append(startupResponse, dto.StartupResponse{
-			ID:          startup.ID,
-		Name:        startup.Name,
-		Description: startup.Description,
-		TargetAudience: startup.TargetAudience,
-		Solution: startup.Solution,
-		ShortDescription: startup.ShortDescription,
-		Creator:     dto.UserResponse{ID: startup.CreatorID, Username: startup.Creator.Username, Email: startup.Creator.Email},
-		Problem: startup.Problem,
-		Categories:  startup.Categories,
-		Files:       startup.Files,
-		Vacansies:   startup.Vacancies,
-		Stage: dto.StageResponse{
-			ID:   startup.StageID,
-			Name: startup.Stage.Name,
-		},
-		LogoUrl: startup.LogoURL,
-		})
+	startupResponse := []dto.StartupResponse{}
+	for _, startup := range startups {
+		startupResponse = append(startupResponse, dto.NewStartupResponse(startup))
 	}
 	totalPages := int(math.Ceil(float64(totalCount) / float64(inputs.Limit)))
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
@@ -217,28 +180,30 @@ func (s * StartupHandler) GetUserStartups(c * fiber.Ctx) error{
 	if err != nil{
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
-startupResponse:=[]dto.StartupResponse{}
-	for _,startup := range startups{
-		startupResponse = append(startupResponse, dto.StartupResponse{
-			ID:          startup.ID,
-		Name:        startup.Name,
-		Description: startup.Description,
-		TargetAudience: startup.TargetAudience,
-		Solution: startup.Solution,
-		ShortDescription: startup.ShortDescription,
-		Creator:     dto.UserResponse{ID: startup.CreatorID, Username: startup.Creator.Username, Email: startup.Creator.Email},
-		Problem: startup.Problem,
-		Categories:  startup.Categories,
-		Files:       startup.Files,
-		Vacansies:   startup.Vacancies,
-		Stage: dto.StageResponse{
-			ID:   startup.StageID,
-			Name: startup.Stage.Name,
-		},
-		LogoUrl: startup.LogoURL,
-		})
+	startupResponse := []dto.StartupResponse{}
+	for _, startup := range startups {
+		startupResponse = append(startupResponse, dto.NewStartupResponse(&startup))
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"items": startupResponse,
 	})
+}
+
+func (s *StartupHandler) AddCategories(c *fiber.Ctx) error {
+	startupID, err := strconv.ParseUint(c.Params("id"), 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid startup id"})
+	}
+
+	var input dto.AddStartupCategoriesInput
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid input"})
+	}
+
+	startup, err := s.services.Startup.AddCategories(c.Context(), uint(startupID), input)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(dto.NewStartupResponse(startup))
 }

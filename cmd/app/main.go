@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"startup_back/internal/config"
 	"startup_back/internal/domain"
@@ -9,15 +8,13 @@ import (
 	"startup_back/internal/repository"
 	"startup_back/internal/routes"
 	"startup_back/internal/service"
-	"time"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/sirupsen/logrus"
 
 	_ "startup_back/docs"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/swagger"
 
 	"gorm.io/driver/postgres"
@@ -47,16 +44,6 @@ func main() {
 		logrus.Fatalf("error loading config: %v", err)
 	}
 
-			result, err := cfg.S3Client.ListObjectsV2(context.TODO(), &s3.ListObjectsV2Input{
-				Bucket: aws.String("idea-crafter"), 
-		})
-		if err != nil {
-				logrus.Fatal(err)
-		}
-
-		for _, obj := range result.Contents {
-				logrus.Printf("Object: %s, size: %d", aws.ToString(obj.Key), obj.Size)
-		}
 	db, err := gorm.Open(postgres.Open(cfg.DBConnectionString()),&gorm.Config{})
 
 	if err !=nil{
@@ -82,40 +69,8 @@ func main() {
 	services:= service.NewServices(repos,cfg)
 	handlers:=handler.NewHandlers(services)
 
-	app:= fiber.New(fiber.Config{
-		ErrorHandler: func(c *fiber.Ctx, err error) error {
-			code := fiber.StatusInternalServerError
-			if e, ok := err.(*fiber.Error); ok {
-				code = e.Code
-			}
-				logrus.WithFields(logrus.Fields{
-				"error": err.Error(),
-				"path":  c.Path(),
-			}).Error("Request failed")
-			return c.Status(code).JSON(fiber.Map{"error":err.Error()})
-		},
-	})
-	app.Use(func(c *fiber.Ctx) error {
-		start := time.Now()
-		err := c.Next() 
-		duration := time.Since(start)
-
-		entry := logrus.WithFields(logrus.Fields{
-			"method":   c.Method(),
-			"path":     c.Path(),
-			"status":   c.Response().StatusCode(),
-			"latency":  duration,
-			"clientIP": c.IP(),
-		})
-
-		if err != nil {
-			entry.WithField("error", err.Error()).Error("Request failed")
-		} else {
-			entry.Info("Request completed")
-		}
-
-		return err
-	})
+	app:= fiber.New()
+	app.Use(logger.New())
 	app.Get("/swagger/*", swagger.HandlerDefault)
 	routes.SetupRoutes(app,handlers,services)
 	address := fmt.Sprintf("%s:%s", cfg.Server.Host,cfg.Server.Port)

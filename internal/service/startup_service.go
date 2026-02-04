@@ -15,6 +15,7 @@ type StartupService interface {
 	GetAll(ctx context.Context, searchString string, limit, offset int) ([]*domain.Startup, int, error)
 	Delete(ctx context.Context, id uint) error
 	GetUserStartups(ctx context.Context, userID uint) ([]domain.Startup, error)
+	AddCategories(ctx context.Context, startupID uint, input dto.AddStartupCategoriesInput) (*domain.Startup, error)
 }
 type startupService struct {
 	repo repository.StartupRepository
@@ -75,4 +76,15 @@ func (s *startupService) Delete(ctx context.Context, id uint) error {
 		return err
 	}
 	return nil
+}
+
+func (s *startupService) AddCategories(ctx context.Context, startupID uint, input dto.AddStartupCategoriesInput) (*domain.Startup, error) {
+	if len(input.CategoryIDs) == 0 {
+		return nil, fmt.Errorf("category_ids are required")
+	}
+	startup, err := s.repo.AddCategories(ctx, startupID, input.CategoryIDs)
+	if err != nil {
+		return nil, err
+	}
+	return startup, nil
 }

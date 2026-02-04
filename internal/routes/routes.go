@@ -34,6 +34,7 @@ func SetupRoutes ( app *fiber.App ,handlers *handler.Handlers,services *service.
 	startup.Get("/my-startups",middleware.RequireAuth(services.Token), handlers.Startup.GetUserStartups)
 	startup.Get("/list", handlers.Startup.GetListStartups)
 	startup.Get("/:id", handlers.Startup.GetStartupByID)
+	startup.Post("/:id/categories", middleware.RequireAuth(services.Token), handlers.Startup.AddCategories)
 
 	vacancy := api.Group("/vacancy")
 	vacancy.Post("/", middleware.RequireAuth(services.Token), handlers.Vacancy.CreateVacancy)
