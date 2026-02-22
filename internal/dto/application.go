@@ -9,3 +9,7 @@ type CreateApplicationInput struct {
 type UpdateApplicationStatusInput struct {
 	Status string `json:"status" validate:"required,oneof=pending accepted rejected"`
 }
+
+type UpdateApplicationInput struct {
+	Message string `json:"message"`
+}

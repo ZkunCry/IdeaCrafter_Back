@@ -25,7 +25,7 @@ func SetupRoutes ( app *fiber.App ,handlers *handler.Handlers,services *service.
 
 	auth.Post("/signup", handlers.Auth.SignUp)
 	auth.Post("/signin", handlers.Auth.SignIn)
-	auth.Post("/me", handlers.Auth.IdentityMe)
+	auth.Get("/me", handlers.Auth.IdentityMe)
 	auth.Post("/refresh", handlers.Auth.Refresh)
 	auth.Post("/logout", handlers.Auth.LogOut)
 
@@ -49,10 +49,9 @@ func SetupRoutes ( app *fiber.App ,handlers *handler.Handlers,services *service.
 
 	application := api.Group("/application")
 	application.Post("/", middleware.RequireAuth(services.Token), handlers.Application.CreateApplication)
-	// application.Get("/vacancy/:id", middleware.RequireAuth(services.Token), handlers.Application.)
 	application.Get("/:id", handlers.Application.GetApplicationByID)
 	application.Put("/:id", middleware.RequireAuth(services.Token), handlers.Application.UpdateApplication)
-	application.Put("/statuc/:id", middleware.RequireAuth(services.Token), handlers.Application.UpdateApplicationStatus) 
+	application.Put("/status/:id", middleware.RequireAuth(services.Token), handlers.Application.UpdateApplicationStatus) 
 
 	stage := api.Group("/stage")
 	stage.Post("/", middleware.RequireAuth(services.Token), handlers.Stage.CreateStage)

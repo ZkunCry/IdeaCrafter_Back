@@ -1,8 +1,9 @@
 package handler
 
 import (
-	"fmt"
+	"startup_back/internal/dto"
 	"startup_back/internal/service"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -29,10 +30,23 @@ func NewApplicationHandler(services *service.Services) *ApplicationHandler {
 // @Router /application [post]
 func (r *ApplicationHandler) CreateApplication(c *fiber.Ctx) error {
 
-	formData := c.FormValue("test")
-	fmt.Println(formData)
+	var input dto.CreateApplicationInput
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid input"})
+	}
 
-	return nil
+	userID, ok := c.Locals("user_id").(uint)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "unauthorized"})
+	}
+	input.UserID = userID
+
+	application, err := r.services.Application.Create(c.Context(), &input)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(application)
 }
 // UpdateApplication
 // @Summary Update an application
@@ -47,7 +61,22 @@ func (r *ApplicationHandler) CreateApplication(c *fiber.Ctx) error {
 // @Failure 404 {object} map[string]string
 // @Router /application/{id} [put]
 func (r * ApplicationHandler) UpdateApplication(c *fiber.Ctx) error {
-	return nil
+	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid id"})
+	}
+
+	var input dto.UpdateApplicationInput
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid input"})
+	}
+
+	application, err := r.services.Application.Update(c.Context(), uint(id), &input)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(application)
 }
 // UpdateApplicationStatus
 // @Summary Update application status
@@ -62,7 +91,22 @@ func (r * ApplicationHandler) UpdateApplication(c *fiber.Ctx) error {
 // @Failure 404 {object} map[string]string
 // @Router /applications/{id}/status [patch]
 func (r * ApplicationHandler) UpdateApplicationStatus(c *fiber.Ctx) error {
-	return nil
+	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid id"})
+	}
+
+	var input dto.UpdateApplicationStatusInput
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid input"})
+	}
+
+	application, err := r.services.Application.UpdateStatus(c.Context(), uint(id), &input)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(application)
 }
 
 // GetApplicationByID
@@ -76,6 +120,16 @@ func (r * ApplicationHandler) UpdateApplicationStatus(c *fiber.Ctx) error {
 // @Failure 404 {object} map[string]string
 // @Router /application/{id} [get]
 func (r *ApplicationHandler) GetApplicationByID(c *fiber.Ctx) error {
-	return nil
+	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid id"})
+	}
+
+	application, err := r.services.Application.GetByID(c.Context(), uint(id))
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(application)
 }
 
