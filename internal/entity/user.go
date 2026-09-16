@@ -1,0 +1,12 @@
+package entity
+
+import "gorm.io/gorm"
+
+type User struct {
+	gorm.Model
+	Username     string     `gorm:"not null" json:"username"`
+	Email        string     `gorm:"unique;not null" json:"email"`
+	PasswordHash string     `gorm:"not null" json:"-"`
+	Startups     []Startup  `gorm:"foreignKey:CreatorID" json:"-"`
+	Favorites    []Favorite `gorm:"foreignKey:UserID" json:"-"`
+}
