@@ -1,7 +1,7 @@
 package role
 
 type CreateInput struct {
-	Name string `json:"name" validate:"required"`
+	Name string `json:"name" validate:"required"` 
 }
 
 type Response struct {

@@ -1,6 +1,9 @@
 package app
 
 import (
+	"context"
+	"time"
+
 	"startup_back/internal/application"
 	"startup_back/internal/auth"
 	"startup_back/internal/category"
@@ -15,9 +18,30 @@ import (
 	"startup_back/internal/vacancy"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/healthcheck"
 	fiberlogger "github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/gofiber/swagger"
+	"gorm.io/gorm"
 )
+
+type App struct {
+	Fiber *fiber.App
+	DB    *gorm.DB
+}
+
+func (a *App) Shutdown(ctx context.Context) error {
+	shutdownErr := a.Fiber.ShutdownWithContext(ctx)
+
+	if sqlDB, err := a.DB.DB(); err == nil {
+		if closeErr := sqlDB.Close(); closeErr != nil && shutdownErr == nil {
+			shutdownErr = closeErr
+		}
+	}
+
+	return shutdownErr
+}
 
 type Handlers struct {
 	Auth        *auth.Handler
@@ -30,11 +54,12 @@ type Handlers struct {
 	Favorite    *favorite.Handler
 }
 
-func New(cfg *config.AppConfig) (*fiber.App, error) {
+func New(cfg *config.AppConfig) (*App, error) {
 	db, err := platformdb.Open(cfg)
 	if err != nil {
 		return nil, err
 	}
+
 	if err := db.AutoMigrate(
 		&entity.User{},
 		&entity.Startup{},
@@ -88,10 +113,44 @@ func New(cfg *config.AppConfig) (*fiber.App, error) {
 		Favorite:    favorite.NewHandler(favoriteService),
 	}
 
-	app := fiber.New()
-	app.Use(fiberlogger.New())
-	app.Get("/swagger/*", swagger.HandlerDefault)
-	SetupRoutes(app, handlers, tokenService)
+	app := fiber.New(fiber.Config{
+		AppName:               "startup_back",
+		ReadTimeout:           15 * time.Second,
+		WriteTimeout:          30 * time.Second,
+		IdleTimeout:           60 * time.Second,
+		BodyLimit:             32 * 1024 * 1024,
+		DisableStartupMessage: cfg.IsProduction(),
+		ProxyHeader: fiber.HeaderXForwardedFor,
+	})
 
-	return app, nil
+	app.Use(recover.New())
+	app.Use(requestid.New())
+	app.Use(fiberlogger.New())
+
+	app.Use(healthcheck.New(healthcheck.Config{
+		LivenessProbe:     func(c *fiber.Ctx) bool { return true },
+		LivenessEndpoint:  "/health",
+		ReadinessProbe:    func(c *fiber.Ctx) bool { return pingDB(c.Context(), db) },
+		ReadinessEndpoint: "/ready",
+	}))
+
+	if !cfg.IsProduction() {
+		app.Get("/swagger/*", swagger.HandlerDefault)
+	}
+
+	SetupRoutes(app, handlers, tokenService, cfg)
+
+	return &App{Fiber: app, DB: db}, nil
+}
+
+func pingDB(ctx context.Context, db *gorm.DB) bool {
+	sqlDB, err := db.DB()
+	if err != nil {
+		return false
+	}
+
+	pingCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+
+	return sqlDB.PingContext(pingCtx) == nil
 }

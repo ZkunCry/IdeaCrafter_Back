@@ -2,15 +2,17 @@ package app
 
 import (
 	"startup_back/internal/auth"
+	"startup_back/internal/platform/config"
 	"startup_back/internal/platform/middleware"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
-func SetupRoutes(app *fiber.App, handlers *Handlers, tokenService auth.TokenService) {
+func SetupRoutes(app *fiber.App, handlers *Handlers, tokenService auth.TokenService, cfg *config.AppConfig) {
+
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://localhost:3000",
+		AllowOrigins:     cfg.Server.CORSOrigins,
 		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
 		AllowMethods:     "GET, POST, PUT, PATCH, DELETE, OPTIONS",
 		AllowCredentials: true,

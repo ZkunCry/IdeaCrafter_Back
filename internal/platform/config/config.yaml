@@ -1,7 +1,13 @@
+env: development
+
 database:
   host: localhost
-  port: 5432
+  port: "5432"
+  ssl_mode: disable
   pool_size: 10
+  max_idle_conn: 2
+
 server:
-  port: 3001
-  host: localhost
+  host: 0.0.0.0
+  port: "3001"
+  cors_origins: http://localhost:3000

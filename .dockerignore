@@ -1,0 +1,27 @@
+# VCS
+.git
+.gitignore
+.github
+
+.env
+.env.*
+!.env.example
+
+vendor/
+
+tmp/
+.air.toml
+*.log
+logs/
+build-errors.log
+
+Dockerfile
+.dockerignore
+docker-compose.yml
+docker-compose.*.yml
+Makefile
+README.md
+DEPLOY.md
+
+.vscode/
+.idea/
